@@ -1,15 +1,14 @@
 {
   "intents": [
     {
-      "tag": "create_file",
-      "patterns": [
-        "Створи файл з назвою",
-        "Новий документ назвою",
-        "Зроби текстовий файл ім'ям",
-        "Запиши файл",
-        "Створити нотатку"
-      ],
-      "responses": ["Creating file..."]
+      "tag": "greeting",
+      "patterns": ["Привіт", "Добрий день", "Здоров", "Хелоу", "Вітаю", "Прив", "Салют"],
+      "responses": ["Hello!"]
+    },
+    {
+      "tag": "bye",
+      "patterns": ["Бувай", "Вихід", "Закрийся", "На добраніч", "Стоп", "Пока", "До побачення"],
+      "responses": ["Goodbye!"]
     },
     {
       "tag": "open_youtube",
@@ -20,43 +19,48 @@
         "Увімкни відосіки",
         "Зайди в ютуб"
       ],
-      "responses": ["Opening YouTube..."]
+      "responses": ["Opening YouTube selection"]
     },
     {
       "tag": "open_browser",
       "patterns": [
         "Відкрий браузер",
         "Запусти хром",
+        "Відкрий хром",
+        "Хром",
         "Увімкни інтернет",
         "Гугл",
-        "Пошук в інтернеті"
+        "Пошук в інтернеті",
+        "Зайди в інтернет"
       ],
-      "responses": ["Opening Browser..."]
+      "responses": ["Opening Browser selection"]
     },
     {
-      "tag": "greeting",
-      "patterns": ["Привіт", "Добрий день", "Здоров", "Хелоу", "Вітаю"],
-      "responses": ["Hello!"]
-    },
-    {
-      "tag": "bye",
-      "patterns": ["Бувай", "Вихід", "Закрийся", "На добраніч", "Стоп"],
-      "responses": ["Goodbye!"]
+      "tag": "create_file",
+      "patterns": [
+        "Створи файл з назвою",
+        "Новий документ назвою",
+        "Зроби текстовий файл ім'ям",
+        "Запиши файл",
+        "Створити нотатку",
+        "Створи файл"
+      ],
+      "responses": ["Creating file..."]
     },
     {
       "tag": "profile_anton",
-      "patterns": ["Антон", "Anton", "Окуляри", "Профіль з окулярами"],
-      "responses": ["Anton"]
+      "patterns": ["Антон", "Профіль Антон", "Перший", "Для Антона", "Антоха"],
+      "responses": ["Opening Anton"]
     },
     {
       "tag": "profile_mrclean",
-      "patterns": ["Містер клін", "Клін", "Mr Clean", "Леві", "Чистий"],
-      "responses": ["Mr Clean"]
+      "patterns": ["Клін", "Містер Клін", "Чистий", "Для кліна", "Профіль один"],
+      "responses": ["Opening MrClean"]
     },
     {
       "tag": "profile_krykhta",
-      "patterns": ["Крихта", "Krykhta", "Основний", "Дефолтний", "Перший"],
-      "responses": ["Krykhta"]
+      "patterns": ["Крихта", "Дефолтний", "Звичайний", "Третій", "Для крихти", "Малий"],
+      "responses": ["Opening Default"]
     }
   ]
 }

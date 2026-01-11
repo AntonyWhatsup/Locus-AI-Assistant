@@ -1,0 +1,62 @@
+{
+  "intents": [
+    {
+      "tag": "create_file",
+      "patterns": [
+        "Створи файл з назвою",
+        "Новий документ назвою",
+        "Зроби текстовий файл ім'ям",
+        "Запиши файл",
+        "Створити нотатку"
+      ],
+      "responses": ["Creating file..."]
+    },
+    {
+      "tag": "open_youtube",
+      "patterns": [
+        "Відкрий Ютуб",
+        "Запусти YouTube",
+        "Хочу подивитися відео",
+        "Увімкни відосіки",
+        "Зайди в ютуб"
+      ],
+      "responses": ["Opening YouTube..."]
+    },
+    {
+      "tag": "open_browser",
+      "patterns": [
+        "Відкрий браузер",
+        "Запусти хром",
+        "Увімкни інтернет",
+        "Гугл",
+        "Пошук в інтернеті"
+      ],
+      "responses": ["Opening Browser..."]
+    },
+    {
+      "tag": "greeting",
+      "patterns": ["Привіт", "Добрий день", "Здоров", "Хелоу", "Вітаю"],
+      "responses": ["Hello!"]
+    },
+    {
+      "tag": "bye",
+      "patterns": ["Бувай", "Вихід", "Закрийся", "На добраніч", "Стоп"],
+      "responses": ["Goodbye!"]
+    },
+    {
+      "tag": "profile_anton",
+      "patterns": ["Антон", "Anton", "Окуляри", "Профіль з окулярами"],
+      "responses": ["Anton"]
+    },
+    {
+      "tag": "profile_mrclean",
+      "patterns": ["Містер клін", "Клін", "Mr Clean", "Леві", "Чистий"],
+      "responses": ["Mr Clean"]
+    },
+    {
+      "tag": "profile_krykhta",
+      "patterns": ["Крихта", "Krykhta", "Основний", "Дефолтний", "Перший"],
+      "responses": ["Krykhta"]
+    }
+  ]
+}

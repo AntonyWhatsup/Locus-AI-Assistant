@@ -2,65 +2,45 @@
   "intents": [
     {
       "tag": "greeting",
-      "patterns": ["Привіт", "Добрий день", "Здоров", "Хелоу", "Вітаю", "Прив", "Салют"],
-      "responses": ["Hello!"]
+      "patterns": ["Hi", "Hello", "Hey", "Locus", "Good morning"],
+      "responses": ["Meow! How can I help?"]
+    },
+    {
+      "tag": "how_are_you",
+      "patterns": ["How are you", "How is it going", "Are you okay", "How do you feel"],
+      "responses": ["Checking my mood..."]
     },
     {
       "tag": "bye",
-      "patterns": ["Бувай", "Вихід", "Закрийся", "На добраніч", "Стоп", "Пока", "До побачення"],
-      "responses": ["Goodbye!"]
+      "patterns": ["Bye", "Goodbye", "Stop", "Exit", "See you"],
+      "responses": ["See you later!"]
+    },
+    
+    {
+      "tag": "open_browser",
+      "patterns": ["Open browser", "Start Chrome", "Launch internet", "Google Chrome"],
+      "responses": ["Which profile?"]
     },
     {
       "tag": "open_youtube",
-      "patterns": [
-        "Відкрий Ютуб",
-        "Запусти YouTube",
-        "Хочу подивитися відео",
-        "Увімкни відосіки",
-        "Зайди в ютуб"
-      ],
-      "responses": ["Opening YouTube selection"]
+      "patterns": ["Open YouTube", "Watch YouTube", "Play video", "Start video", "Youtube"],
+      "responses": ["Which profile for YouTube?"]
     },
-    {
-      "tag": "open_browser",
-      "patterns": [
-        "Відкрий браузер",
-        "Запусти хром",
-        "Відкрий хром",
-        "Хром",
-        "Увімкни інтернет",
-        "Гугл",
-        "Пошук в інтернеті",
-        "Зайди в інтернет"
-      ],
-      "responses": ["Opening Browser selection"]
-    },
-    {
-      "tag": "create_file",
-      "patterns": [
-        "Створи файл з назвою",
-        "Новий документ назвою",
-        "Зроби текстовий файл ім'ям",
-        "Запиши файл",
-        "Створити нотатку",
-        "Створи файл"
-      ],
-      "responses": ["Creating file..."]
-    },
+
     {
       "tag": "profile_anton",
-      "patterns": ["Антон", "Профіль Антон", "Перший", "Для Антона", "Антоха"],
-      "responses": ["Opening Anton"]
+      "patterns": ["Anton", "Anthony", "Tony", "First profile", "Anthem", "Anthon"],
+      "responses": ["Opening Anton's profile."]
     },
     {
       "tag": "profile_mrclean",
-      "patterns": ["Клін", "Містер Клін", "Чистий", "Для кліна", "Профіль один"],
-      "responses": ["Opening MrClean"]
+      "patterns": ["Clean", "Mr Clean", "Mister Clean"],
+      "responses": ["Opening Mr Clean."]
     },
     {
-      "tag": "profile_krykhta",
-      "patterns": ["Крихта", "Дефолтний", "Звичайний", "Третій", "Для крихти", "Малий"],
-      "responses": ["Opening Default"]
+      "tag": "profile_default",
+      "patterns": ["Default", "Normal", "Main", "Home"],
+      "responses": ["Opening Default."]
     }
   ]
 }

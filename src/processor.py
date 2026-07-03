@@ -2,10 +2,10 @@ import speech_recognition as sr
 import threading
 import torch
 import time
-from config import LANG_CODE, WAKE_WORDS, MODEL_DATA_PATH
-from model import NeuralNet
-from nltk_utils import bag_of_words, tokenize
-from actions import ask_gemini, execute_command_logic
+from src.config import LANG_CODE, WAKE_WORDS, MODEL_DATA_PATH
+from src.brain.model import NeuralNet
+from src.brain.nltk_utils import bag_of_words, tokenize
+from src.actions import ask_gemini, execute_command_logic
 
 # Zmienne globalne
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

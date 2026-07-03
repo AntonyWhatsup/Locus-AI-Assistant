@@ -1,8 +1,8 @@
 import tkinter as tk
 import threading
-from ui_manager import LocusUI
-from processor import background_listener, reload_model, manual_activation
-from trainer_module import run_training
+from src.ui_manager import LocusUI
+from src.processor import background_listener, reload_model, manual_activation
+from src.brain.trainer_module import run_training
 
 def start_sequence(ui):
     # 1. Obraz treningowy

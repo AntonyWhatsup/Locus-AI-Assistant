@@ -20,7 +20,8 @@ CHROME_PROFILES = {
 }
 
 # --- Ścieżki do plików ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# BASE_DIR should point to the root directory, which is one level up from src/
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-MODEL_DATA_PATH = os.path.join(BASE_DIR, "data.pth")
-INTENTS_PATH = os.path.join(BASE_DIR, "intents.json")   
+MODEL_DATA_PATH = os.path.join(BASE_DIR, "data", "data.pth")
+INTENTS_PATH = os.path.join(BASE_DIR, "src", "brain", "intents.json")

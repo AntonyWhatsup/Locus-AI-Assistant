@@ -2,7 +2,7 @@ import subprocess
 import shutil
 import os
 import google.generativeai as genai
-from config import GOOGLE_API_KEY, CHROME_PROFILES, MODEL_NAME
+from src.config import GOOGLE_API_KEY, CHROME_PROFILES, MODEL_NAME
 
 # --- Inicjalizacja Gemini AI ---
 gemini = None

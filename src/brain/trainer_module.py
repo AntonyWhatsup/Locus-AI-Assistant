@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 import random
-from nltk_utils import tokenize, stem, bag_of_words
-from model import NeuralNet
-from config import INTENTS_PATH, MODEL_DATA_PATH
+from src.brain.nltk_utils import tokenize, stem, bag_of_words
+from src.brain.model import NeuralNet
+from src.config import INTENTS_PATH, MODEL_DATA_PATH
 
 def run_training():
     # Ustalenie ziarna losowości (seed) dla powtarzalności wyników
@@ -90,6 +90,8 @@ def run_training():
         "tags": tags
     }
     
+    import os
+    os.makedirs(os.path.dirname(MODEL_DATA_PATH), exist_ok=True)
     torch.save(data, MODEL_DATA_PATH)
     print(f"--- TRAINING COMPLETE | Final Loss: {loss.item():.6f} ---")
     return True

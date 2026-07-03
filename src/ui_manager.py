@@ -3,7 +3,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 import random
-from config import ASSETS_DIR
+from src.config import ASSETS_DIR
 
 class LocusUI:
     def __init__(self, root):

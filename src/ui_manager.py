@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import os
 import random
 from src.config import ASSETS_DIR
+import src.config as config
 
 class LocusUI:
     def __init__(self, root):
@@ -13,7 +14,7 @@ class LocusUI:
         self.is_visualizer_running = False
         
         self.root.title("Locus AI v1.9 - Master")
-        self.root.geometry("450x620")
+        self.root.geometry("450x670")
         self.root.config(bg="#f5f5f5")
 
         # Main cat image (Added cursor="hand2" for clickability effect)
@@ -32,6 +33,18 @@ class LocusUI:
         self.user_speech_label = tk.Label(root, text="", wraplength=400, font=("Arial", 10), bg="#f5f5f5")
         self.user_speech_label.pack(pady=5)
 
+        # Settings Button
+        self.settings_btn = tk.Button(
+            root, 
+            text="⚙ Налаштування", 
+            font=("Arial", 10, "bold"), 
+            bg="#e0e0e0", 
+            fg="#333333", 
+            relief="flat",
+            command=self.open_settings_window
+        )
+        self.settings_btn.pack(pady=15)
+
     def fade_to_image(self, state):
         """Smooth image change based on state (idle, listen, cool, train...)"""
         if self.animation_id: self.root.after_cancel(self.animation_id)
@@ -49,34 +62,4 @@ class LocusUI:
             return
 
         if self.current_raw_img is None:
-            photo = ImageTk.PhotoImage(img_open)
-            self.image_label.config(image=photo); self.image_label.image = photo
-            self.current_raw_img = img_open
-            return
-
-        # Transition animation (Alpha Blending)
-        def step(alpha):
-            if alpha > 1.0: 
-                self.current_raw_img = img_open
-                return
-            blended = Image.blend(self.current_raw_img, img_open, alpha)
-            photo = ImageTk.PhotoImage(blended)
-            self.image_label.config(image=photo); self.image_label.image = photo
-            self.animation_id = self.root.after(30, lambda: step(alpha + 0.1))
-        step(0.0)
-
-    # --- SOUND VISUALIZER ---
-    def start_visualizer(self):
-        self.is_visualizer_running = True
-        def anim():
-            if self.is_visualizer_running:
-                val = random.randint(10, 85)
-                self.volume_bar['value'] = val
-                self.root.after(100, anim)
-            else:
-                self.volume_bar['value'] = 0
-        anim()
-
-    def stop_visualizer(self):
-        self.is_visualizer_running = False
-        self.volume_bar['value'] = 0
+            photo = ImageTk.PhotoImage(

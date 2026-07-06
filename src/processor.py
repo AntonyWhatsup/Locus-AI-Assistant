@@ -49,8 +49,8 @@ def listen_and_process(ui):
 
         ui.root.after(0, ui.start_visualizer)
 
-        with sr.Microphone() as source:
-            try:
+        try:
+            with sr.Microphone() as source:
                 # Listening
                 audio = r.listen(source, timeout=5, phrase_time_limit=7)
                 ui.root.after(0, ui.stop_visualizer)
@@ -106,16 +106,24 @@ def listen_and_process(ui):
                     ui.root.after(0, ui.root.quit)
                     return
 
-            except sr.WaitTimeoutError:
-                print("LOG: Timeout. Sleeping.")
-                break 
-            except sr.UnknownValueError:
-                ui.root.after(0, lambda: ui.status_label.config(text="Come again?", fg="orange"))
-                time.sleep(1)
-                continue
-            except Exception as e:
-                print(f"Error: {e}")
-                break
+        except (OSError, IOError) as mic_err:
+            print(f"Microphone Error: {mic_err}")
+            ui.root.after(0, ui.stop_visualizer)
+            ui.root.after(0, lambda: ui.fade_to_image("error"))
+            ui.root.after(0, lambda: ui.status_label.config(text="No Microphone!", fg="red"))
+            ui.root.after(0, lambda: ui.user_speech_label.config(text="I can't hear you, your micro is off"))
+            time.sleep(4)
+            break
+        except sr.WaitTimeoutError:
+            print("LOG: Timeout. Sleeping.")
+            break 
+        except sr.UnknownValueError:
+            ui.root.after(0, lambda: ui.status_label.config(text="Come again?", fg="orange"))
+            time.sleep(1)
+            continue
+        except Exception as e:
+            print(f"Error: {e}")
+            break
 
     is_processing = False
     ui.root.after(0, ui.stop_visualizer)
@@ -126,11 +134,13 @@ def background_listener(ui):
     r = sr.Recognizer()
     while True:
         if not is_processing:
-            with sr.Microphone() as source:
-                try:
+            try:
+                with sr.Microphone() as source:
                     audio = r.listen(source, phrase_time_limit=3)
                     text = r.recognize_google(audio, language=LANG_CODE).lower()
                     if any(w in text for w in WAKE_WORDS):
                         threading.Thread(target=listen_and_process, args=(ui,)).start()
-                except: pass
+            except Exception as e:
+                # If microphone is missing, avoid spamming errors and wait longer
+                time.sleep(3)
         time.sleep(0.1)

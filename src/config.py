@@ -3,23 +3,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Konfiguracja API i Modelu ---
+# --- API and Model Configuration ---
 GOOGLE_API_KEY = os.getenv('GEMINI_KEY')
 MODEL_NAME = 'gemini-flash-latest' 
 
-# Słowa aktywujące asystenta
+# Wake words for assistant activation
 WAKE_WORDS = ["locus", "local", "locust", "focus"]
 LANG_CODE = "en-US"
 
-# Profile przeglądarki Chrome
-# (Sprawdzone: Anton -> Profile 2, Mr Clean -> Profile 1)
+# Chrome browser profiles
+# (Verified: Anton -> Profile 2, Mr Clean -> Profile 1)
 CHROME_PROFILES = {
     "profile_anton": "Profile 2",   
     "profile_mrclean": "Profile 1", 
     "profile_default": "Default"    
 }
 
-# --- Ścieżki do plików ---
+# --- File Paths ---
 # BASE_DIR should point to the root directory, which is one level up from src/
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')

@@ -5,18 +5,18 @@ from dotenv import load_dotenv
 load_dotenv()
 api_key = os.getenv('GEMINI_KEY')
 
-print("--- ДІАГНОСТИКА ---")
+print("--- DIAGNOSTICS ---")
 try:
-    print(f"Версія бібліотеки: {genai.__version__}")
+    print(f"Library version: {genai.__version__}")
 except:
-    print("Версія бібліотеки: <надто стара, щоб показати версію>")
+    print("Library version: <too old to show version>")
 
 if not api_key:
-    print("ПОМИЛКА: Немає ключа в .env!")
+    print("ERROR: No key in .env!")
 else:
     genai.configure(api_key=api_key)
-    print(f"Ключ знайдено: {api_key[:5]}...{api_key[-5:]}")
-    print("\nДоступні моделі (що бачить твій скрипт):")
+    print(f"Key found: {api_key[:5]}...{api_key[-5:]}")
+    print("\nAvailable models (what your script sees):")
     try:
         found = False
         for m in genai.list_models():
@@ -24,6 +24,6 @@ else:
                 print(f" - {m.name}")
                 found = True
         if not found:
-            print("Список порожній (проблема з ключем або регіоном).")
+            print("List is empty (key or region issue).")
     except Exception as e:
-        print(f"КРИТИЧНА ПОМИЛКА ЗАПИТУ: {e}")
+        print(f"CRITICAL REQUEST ERROR: {e}")

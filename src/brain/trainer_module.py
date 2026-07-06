@@ -8,14 +8,14 @@ from src.brain.model import NeuralNet
 from src.config import INTENTS_PATH, MODEL_DATA_PATH
 
 def run_training():
-    # Ustalenie ziarna losowości (seed) dla powtarzalności wyników
+    # Set random seed for reproducibility
     random.seed(42)
     np.random.seed(42)
     torch.manual_seed(42)
     
     print("--- STARTING BRAIN TRAINING (High Precision) ---")
     
-    # Ładowanie danych treningowych
+    # Loading training data
     with open(INTENTS_PATH, 'r') as f:
         intents = json.load(f)
 
@@ -23,7 +23,7 @@ def run_training():
     tags = []
     xy = []
     
-    # Przetwarzanie intencji i wzorców
+    # Processing intents and patterns
     for intent in intents['intents']:
         tag = intent['tag']
         tags.append(tag)
@@ -32,13 +32,13 @@ def run_training():
             all_words.extend(w)
             xy.append((w, tag))
 
-    # Usuwanie znaków interpunkcyjnych i stemming
+    # Removing punctuation and stemming
     ignore_words = ['?', '!', '.', ',']
     all_words = [stem(w) for w in all_words if w not in ignore_words]
     all_words = sorted(set(all_words))
     tags = sorted(set(tags))
 
-    # Przygotowanie danych treningowych
+    # Preparing training data
     X_train = []
     y_train = []
     for (pattern_sentence, tag) in xy:
@@ -47,28 +47,28 @@ def run_training():
         label = tags.index(tag)
         y_train.append(label)
 
-    # Konwersja do tensorów PyTorch
+    # Conversion to PyTorch tensors
     X_train = np.array(X_train)
     X_train = torch.tensor(X_train, dtype=torch.float32)
     y_train = torch.tensor(y_train, dtype=torch.long)
 
-    # Hiperparametry sieci (Zwiększona precyzja)
+    # Network Hyperparameters (Increased precision)
     input_size = len(X_train[0])
     hidden_size = 16
     output_size = len(tags)
     learning_rate = 0.001
     num_epochs = 1200 
 
-    # Wybór urządzenia (GPU/CPU)
+    # Device selection (GPU/CPU)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     model = NeuralNet(input_size, hidden_size, output_size).to(device)
 
-    # Funkcja straty i optymalizator
+    # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    # Pętla treningowa
+    # Training loop
     for epoch in range(num_epochs):
         outputs = model(X_train.to(device))
         loss = criterion(outputs, y_train.to(device))
@@ -80,7 +80,7 @@ def run_training():
         if (epoch+1) % 100 == 0:
             print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.6f}')
 
-    # Zapisywanie modelu
+    # Saving the model
     data = {
         "model_state": model.state_dict(),
         "input_size": input_size,

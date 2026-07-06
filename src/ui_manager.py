@@ -16,24 +16,24 @@ class LocusUI:
         self.root.geometry("450x620")
         self.root.config(bg="#f5f5f5")
 
-        # Główny obraz kota (Dodano cursor="hand2" dla efektu klikalności)
+        # Main cat image (Added cursor="hand2" for clickability effect)
         self.image_label = tk.Label(root, bg="#f5f5f5", cursor="hand2")
         self.image_label.pack(pady=20)
 
-        # Pasek głośności (Wizualizator)
+        # Volume bar (Visualizer)
         self.volume_bar = ttk.Progressbar(root, length=300, mode='determinate')
         self.volume_bar.pack()
 
-        # Status tekstowy
+        # Status text
         self.status_label = tk.Label(root, text="System Ready", font=("Arial", 14, "bold"), bg="#f5f5f5")
         self.status_label.pack(pady=10)
 
-        # Tekst dialogu
+        # Dialogue text
         self.user_speech_label = tk.Label(root, text="", wraplength=400, font=("Arial", 10), bg="#f5f5f5")
         self.user_speech_label.pack(pady=5)
 
     def fade_to_image(self, state):
-        """Płynna zmiana obrazu na podstawie stanu (idle, listen, cool, train...)"""
+        """Smooth image change based on state (idle, listen, cool, train...)"""
         if self.animation_id: self.root.after_cancel(self.animation_id)
         
         path = os.path.join(ASSETS_DIR, f"cat_{state}.jpg")
@@ -54,7 +54,7 @@ class LocusUI:
             self.current_raw_img = img_open
             return
 
-        # Animacja przejścia (Alpha Blending)
+        # Transition animation (Alpha Blending)
         def step(alpha):
             if alpha > 1.0: 
                 self.current_raw_img = img_open
@@ -65,7 +65,7 @@ class LocusUI:
             self.animation_id = self.root.after(30, lambda: step(alpha + 0.1))
         step(0.0)
 
-    # --- WIZUALIZATOR DŹWIĘKU ---
+    # --- SOUND VISUALIZER ---
     def start_visualizer(self):
         self.is_visualizer_running = True
         def anim():

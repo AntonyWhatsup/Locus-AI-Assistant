@@ -4,13 +4,13 @@ import torch.nn as nn
 class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(NeuralNet, self).__init__()
-        # Pierwsza warstwa liniowa
+        # First linear layer
         self.l1 = nn.Linear(input_size, hidden_size) 
-        # Druga warstwa liniowa
+        # Second linear layer
         self.l2 = nn.Linear(hidden_size, hidden_size) 
-        # Warstwa wyjściowa
+        # Output layer
         self.l3 = nn.Linear(hidden_size, num_classes)
-        # Funkcja aktywacji ReLU
+        # ReLU activation function
         self.relu = nn.ReLU()
     
     def forward(self, x):
@@ -19,5 +19,5 @@ class NeuralNet(nn.Module):
         out = self.l2(out)
         out = self.relu(out)
         out = self.l3(out)
-        # Softmax nie jest tutaj potrzebny, jest stosowany automatycznie w CrossEntropyLoss
+        # Softmax is not needed here, it is automatically applied in CrossEntropyLoss
         return out

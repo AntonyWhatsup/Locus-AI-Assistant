@@ -7,14 +7,14 @@ from src.brain.model import NeuralNet
 from src.brain.nltk_utils import bag_of_words, tokenize
 from src.actions import ask_gemini, execute_command_logic
 
-# Zmienne globalne
+# Global variables
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model, all_words, tags = None, None, None
 is_processing = False
 active_context = None
 
 def reload_model():
-    """Ładuje nowy mózg (model) po zakończeniu treningu."""
+    """Loads new brain (model) after training is complete."""
     global model, all_words, tags
     try:
         data = torch.load(MODEL_DATA_PATH, map_location=device)
@@ -27,7 +27,7 @@ def reload_model():
         print(f"Reload Error: {e}")
 
 def manual_activation(ui):
-    """Ręczne uruchomienie nasłuchiwania po kliknięciu w kota."""
+    """Manually activate listening after clicking the cat."""
     if not is_processing:
         print("LOG: Manual activation via click.")
         threading.Thread(target=listen_and_process, args=(ui,)).start()
@@ -39,7 +39,7 @@ def listen_and_process(ui):
     r.pause_threshold = 1.0 
 
     while True:
-        # Aktualizacja UI w zależności od kontekstu
+        # UI update based on context
         if active_context:
             ui.root.after(0, lambda: ui.status_label.config(text="WHICH PROFILE?", fg="orange"))
             ui.root.after(0, lambda: ui.fade_to_image("think")) 
@@ -51,7 +51,7 @@ def listen_and_process(ui):
 
         with sr.Microphone() as source:
             try:
-                # Nasłuchiwanie
+                # Listening
                 audio = r.listen(source, timeout=5, phrase_time_limit=7)
                 ui.root.after(0, ui.stop_visualizer)
                 
@@ -61,7 +61,7 @@ def listen_and_process(ui):
                 text = r.recognize_google(audio, language=LANG_CODE)
                 ui.root.after(0, lambda: ui.user_speech_label.config(text=f"You: {text}"))
 
-                # Przetwarzanie
+                # Processing
                 X = torch.from_numpy(bag_of_words(tokenize(text), all_words).reshape(1, -1)).to(device)
                 output = model(X)
                 prob, predicted = torch.max(torch.softmax(output, dim=1), dim=1)
@@ -70,7 +70,7 @@ def listen_and_process(ui):
 
                 print(f"LOG: Heard '{text}' -> {tag} ({conf:.2f})")
 
-                # Logika
+                # Logic
                 res, active_context = execute_command_logic(tag, conf, active_context)
                 
                 # --- UI Feedback ---

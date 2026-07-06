@@ -3,7 +3,7 @@ import numpy as np
 import inspect
 from nltk.stem.porter import PorterStemmer
 
-# Poprawka dla Python 3.11+ (obsługa starej biblioteki inspect)
+# Fix for Python 3.11+ (handling old inspect library)
 if not hasattr(inspect, 'getargspec'):
     def _getargspec_wrapper(func):
         full_spec = inspect.getfullargspec(func)
@@ -13,17 +13,17 @@ if not hasattr(inspect, 'getargspec'):
 stemmer = PorterStemmer()
 
 def tokenize(sentence):
-    """Dzieli zdanie na listę słów (tokenizacja)."""
+    """Splits a sentence into a list of words (tokenization)."""
     return nltk.word_tokenize(sentence)
 
 def stem(word):
-    """Sprowadza słowo do jego formy podstawowej (stemming)."""
+    """Reduces a word to its base form (stemming)."""
     return stemmer.stem(word.lower())
 
 def bag_of_words(tokenized_sentence, words):
     """
-    Tworzy wektor binarny (Bag of Words):
-    1 - jeśli słowo występuje w zdaniu, 0 - jeśli nie.
+    Creates a binary vector (Bag of Words):
+    1 - if word is present in sentence, 0 - if not.
     """
     sentence_words = [stem(word) for word in tokenized_sentence]
     bag = np.zeros(len(words), dtype=np.float32)

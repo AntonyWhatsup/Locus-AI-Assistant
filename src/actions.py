@@ -4,7 +4,7 @@ import os
 import google.generativeai as genai
 from src.config import GOOGLE_API_KEY, CHROME_PROFILES, MODEL_NAME
 
-# --- Inicjalizacja Gemini AI ---
+# --- Gemini AI Initialization ---
 gemini = None
 if GOOGLE_API_KEY:
     try:
@@ -14,12 +14,12 @@ if GOOGLE_API_KEY:
         print(f"Gemini Init Error: {e}")
 
 def ask_gemini(text):
-    """Wysyła zapytanie do AI i zwraca odpowiedź tekstową."""
+    """Sends a query to the AI and returns a text response."""
     if not gemini:
         return "Meow... I have no brains (API Key missing)."
     try:
-        # --- ZMIANA TUTAJ: OSOBOWOŚĆ KOTA ---
-        # Instrukcja dla AI: Bądź kotem, używaj memicznego stylu, bądź krótki i zabawny.
+        # --- CHANGE HERE: CAT PERSONALITY ---
+        # AI instruction: Be a cat, use a meme-like style, be short and funny.
         prompt = (
             f"You are a funny, slightly sarcastic cat assistant named Locus. "
             f"You like memes and snacks. Keep answers short (1 sentence). "
@@ -32,9 +32,9 @@ def ask_gemini(text):
         print(f"Gemini Request Error: {e}")
         return "Meow... Connection error to Google AI."
 
-# --- Wyszukiwanie zainstalowanego Chrome ---
+# --- Searching for installed Chrome ---
 def find_chrome():
-    """Szuka ścieżki do chrome.exe w standardowych folderach Windows."""
+    """Searches for the path to chrome.exe in standard Windows folders."""
     path = shutil.which("chrome") or shutil.which("google-chrome")
     if path: return path
     
@@ -49,15 +49,15 @@ def find_chrome():
 
 CHROME_PATH = find_chrome()
 
-# --- Główna logika poleceń ---
+# --- Main command logic ---
 def execute_command_logic(tag, confidence, active_context):
     """
-    Decyduje o działaniu na podstawie tagu z sieci neuronowej.
-    Zwraca: (nazwa_akcji, nowy_kontekst)
+    Decides on action based on the tag from the neural network.
+    Returns: (action_name, new_context)
     """
     print(f"DEBUG ACTION: Tag={tag}, Conf={confidence:.2f}, Context={active_context}")
 
-    # 1. OBSŁUGA KONTEKSTU (Jeśli czekamy na wybór profilu)
+    # 1. CONTEXT HANDLING (If waiting for profile selection)
     if active_context:
         if tag in CHROME_PROFILES:
             profile_dir = CHROME_PROFILES[tag]
@@ -82,24 +82,24 @@ def execute_command_logic(tag, confidence, active_context):
             
         return "think", active_context
 
-    # 2. "COOL CAT" (Stan: Jak się masz?)
+    # 2. "COOL CAT" (State: How are you?)
     if tag == "how_are_you" and confidence > 0.60:
         return "gemini_cool_request", None
 
-    # 3. OTWARCIE YOUTUBE
+    # 3. OPEN YOUTUBE
     if tag == "open_youtube" and confidence > 0.60:
         return "ask_profile_yt", "waiting_for_profile_youtube"
 
-    # 4. OTWARCIE PRZEGLĄDARKI
+    # 4. OPEN BROWSER
     if tag == "open_browser" and confidence > 0.60:
         return "ask_profile_chrome", "waiting_for_profile_browser"
 
-    # 5. POŻEGNANIE
+    # 5. FAREWELL
     if tag == "bye" and confidence > 0.60:
         return "bye", None
 
-    # 6. WSZYSTKO INNE (W tym 'greeting') -> GEMINI
-    # Teraz Gemini odpowie jak kot, a nie jak robot.
+    # 6. EVERYTHING ELSE (Including 'greeting') -> GEMINI
+    # Now Gemini will respond like a cat, not a robot.
     if confidence > 0.20:
         return "gemini_request", None
     

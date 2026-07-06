@@ -1,75 +1,75 @@
-# Технічна інформація про проект "Locus AI"
+# Technical Information about the "Locus AI" Project
 
-Цей документ містить технічний огляд проекту "Locus AI", виходячи з наданих файлів.
+This document provides a technical overview of the "Locus AI" project, based on the provided files.
 
-## 1. Загальний огляд
+## 1. General Overview
 
-"Locus AI" виглядає як настільний застосунок (ймовірно, на базі Python з Tkinter), який інтегрує можливості штучного інтелекту/обробки природної мови (NLP) для взаємодії з користувачем. Він включає візуальний інтерфейс з анімаціями та функціональність для обробки голосових команд та виконання дій.
+"Locus AI" appears to be a desktop application (likely Python-based with Tkinter) that integrates artificial intelligence/natural language processing (NLP) capabilities for user interaction. It includes a visual interface with animations and functionality for processing voice commands and executing actions.
 
-## 2. Основні компоненти та їх функції
+## 2. Core Components and Their Functions
 
 ### 2.1. `main.py`
-Основний файл для запуску програми. Містить функцію `start_sequence`, яка ініціалізує UI та запускає основні задачі програми, включаючи анімацію та потенційну обробку команд.
+The main file for launching the application. It contains the `start_sequence` function, which initializes the UI and starts the main tasks of the program, including animation and potential command processing.
 
 ### 2.2. `src/ui_manager.py`
-Відповідає за керування користувацьким інтерфейсом.
-*   **Клас `LocusUI`**: Головний клас для UI, використовує `tkinter`.
-    *   Встановлює вікно програми ("Locus AI v1.9 - Master"), його розмір та фоновий колір.
-    *   Метод `fade_to_image`: Реалізує плавний перехід між зображеннями (наприклад, `idle`, `listen`, `cool`, `train`), ймовірно, для візуального відображення стану системи.
-    *   Методи `start_visualizer` та `stop_visualizer`: Керують анімацією або візуалізацією, яка запускається у фоновому режимі.
+Responsible for managing the user interface.
+*   **`LocusUI` Class**: The main UI class, using `tkinter`.
+    *   Sets up the application window ("Locus AI v1.9 - Master"), its size, and background color.
+    *   `fade_to_image` Method: Implements a smooth transition between images (e.g., `idle`, `listen`, `cool`, `train`), likely for visual indication of system status.
+    *   `start_visualizer` and `stop_visualizer` Methods: Control an animation or visualization that runs in the background.
 
-### 2.3. `src/brain/` - Компоненти ШІ/NLP
-Цей каталог містить основну логіку для обробки природної мови та моделі машинного навчання.
+### 2.3. `src/brain/` - AI/NLP Components
+This directory contains the core logic for natural language processing and machine learning models.
 
 #### 2.3.1. `src/brain/model.py`
-Визначає архітектуру нейронної мережі для класифікації інтентів або іншої NLP задачі.
-*   **Клас `NeuralNet`**: Модель на базі `PyTorch` (`nn.Module`).
-    *   Складається з трьох лінійних шарів (`l1`, `l2`, `l3`).
-    *   Використовує функцію активації `ReLU` між шарами.
-    *   Призначена для перетворення вхідного вектора (`input_size`) у вектор класів (`num_classes`) через прихований шар (`hidden_size`).
+Defines the neural network architecture for intent classification or other NLP tasks.
+*   **`NeuralNet` Class**: A `PyTorch` (`nn.Module`) based model.
+    *   Consists of three linear layers (`l1`, `l2`, `l3`).
+    *   Uses the `ReLU` activation function between layers.
+    *   Designed to transform an input vector (`input_size`) into a class vector (`num_classes`) via a hidden layer (`hidden_size`).
 
 #### 2.3.2. `src/brain/nltk_utils.py`
-Утиліти для попередньої обробки тексту, ймовірно, з використанням бібліотеки NLTK.
-*   `_getargspec_wrapper`: Допоміжна функція, пов'язана з інспекцією аргументів функцій.
-*   `tokenize(sentence)`: Розбиває речення на слова (токени).
-*   `stem(word)`: Зводить слово до його основи (стему), ймовірно, для зменшення розміру словника та нормалізації тексту.
-*   `bag_of_words(tokenized_sentence, words)`: Створює вектор "мішка слів" для речення на основі заданого словника, що є поширеним представленням тексту для моделей NLP.
+Utilities for text preprocessing, likely using the NLTK library.
+*   `_getargspec_wrapper`: Helper function related to inspecting function arguments.
+*   `tokenize(sentence)`: Splits a sentence into words (tokens).
+*   `stem(word)`: Reduces a word to its base form (stem), likely to reduce vocabulary size and normalize text.
+*   `bag_of_words(tokenized_sentence, words)`: Creates a "bag of words" vector for a sentence based on a given vocabulary, which is a common text representation for NLP models.
 
 #### 2.3.3. `src/brain/trainer_module.py`
-Містить функціональність для навчання моделі ШІ.
-*   `run_training()`: Функція, яка, ймовірно, відповідає за запуск процесу навчання нейронної мережі, використовуючи дані з `intents.json` та утиліти з `nltk_utils.py`.
+Contains functionality for training the AI model.
+*   `run_training()`: A function that likely handles the process of training the neural network, using data from `intents.json` and utilities from `nltk_utils.py`.
 
 #### 2.3.4. `src/brain/intents.json`
-Ймовірно, файл у форматі JSON, який містить визначення інтентів (намірів) користувача, приклади фраз для кожного інтенту та відповідні відповіді або дії. Це є типовим для чат-ботів та голосових асистентів.
+Likely a JSON format file containing user intent definitions, example phrases for each intent, and corresponding responses or actions. This is typical for chatbots and voice assistants.
 
 ### 2.4. `src/actions.py`
-Визначає дії, які система може виконувати на основі розпізнаних інтентів.
-*   `ask_gemini(text)`: Функція для взаємодії з API Gemini (ймовірно, Google Gemini) для обробки запитів або отримання інформації.
-*   `find_chrome()`: Функція для виявлення та, можливо, запуску браузера Google Chrome.
-*   `execute_command_logic(tag, confidence, active_context)`: Основна логіка виконання команд на основі розпізнаного інтенту (`tag`), рівня впевненості (`confidence`) та поточного контексту (`active_context`).
+Defines actions that the system can perform based on recognized intents.
+*   `ask_gemini(text)`: Function for interacting with the Gemini API (likely Google Gemini) to process queries or retrieve information.
+*   `find_chrome()`: Function to detect and potentially launch the Google Chrome browser.
+*   `execute_command_logic(tag, confidence, active_context)`: The main logic for executing commands based on the recognized intent (`tag`), confidence level (`confidence`), and current context (`active_context`).
 
 ### 2.5. `src/processor.py`
-Відповідає за обробку вхідних даних (голосу, тексту) та їх передачу до моделі ШІ.
-*   `reload_model()`: Перезавантажує модель ШІ, можливо, після змін або для оновлення.
-*   `manual_activation(ui)`: Функція для ручної активації системи, можливо, через UI.
-*   `listen_and_process(ui)`: Основна функція для прослуховування вхідних даних (голосу), їх обробки та передачі до компонентів ШІ.
-*   `background_listener(ui)`: Функція для прослуховування у фоновому режимі, що дозволяє системі постійно чекати на команди.
+Responsible for processing input data (voice, text) and passing it to the AI model.
+*   `reload_model()`: Reloads the AI model, possibly after changes or for updates.
+*   `manual_activation(ui)`: Function for manual system activation, possibly via UI.
+*   `listen_and_process(ui)`: The main function for listening to input (voice), processing it, and passing it to AI components.
+*   `background_listener(ui)`: Function for background listening, allowing the system to continuously wait for commands.
 
 ### 2.6. `src/config.py`
-Ймовірно, містить конфігураційні параметри для програми, такі як API-ключі, шляхи до файлів, налаштування моделі тощо.
+Likely contains configuration parameters for the application, such as API keys, file paths, model settings, etc.
 
-## 3. Залежності (передбачувані)
-*   **`tkinter`**: Для створення графічного інтерфейсу користувача.
-*   **`torch` / `torch.nn`**: Для побудови та навчання нейронних мереж.
-*   **`nltk`**: Для обробки природної мови (токенізація, стемінг).
-*   **API Google Gemini**: Для функціональності, пов'язаної з `ask_gemini`.
-*   Ймовірно, інші бібліотеки для розпізнавання мови, синтезу мови, роботи з файловою системою тощо.
+## 3. Dependencies (Anticipated)
+*   **`tkinter`**: For creating the graphical user interface.
+*   **`torch` / `torch.nn`**: For building and training neural networks.
+*   **`nltk`**: For natural language processing (tokenization, stemming).
+*   **Google Gemini API**: For functionality related to `ask_gemini`.
+*   Likely other libraries for speech recognition, speech synthesis, file system operations, etc.
 
-## 4. Ресурси та активи
-*   **`assets/`**: Каталог, що містить зображення, які використовуються в UI (`cat_cool.jpg`, `cat_error.jpg`, `cat_idle.jpg`, `cat_listen.jpg`, `cat_success.jpg`, `cat_think.jpg`, `cat_train.jpg`). Це вказує на використання візуальних індикаторів стану системи.
+## 4. Resources and Assets
+*   **`assets/`**: A directory containing images used in the UI (`cat_cool.jpg`, `cat_error.jpg`, `cat_idle.jpg`, `cat_listen.jpg`, `cat_success.jpg`, `cat_think.jpg`, `cat_train.jpg`). This indicates the use of visual indicators for system status.
 
-## 5. Скрипти
-*   **`scripts/debug_gemini.py`**: Окремий скрипт для налагодження взаємодії з API Gemini.
+## 5. Scripts
+*   **`scripts/debug_gemini.py`**: A separate script for debugging interaction with the Gemini API.
 
-## 6. Компільовані файли
-*   `__pycache__/` та його вміст: Містить скомпільовані файли Python (`.pyc`), які є оптимізованими байт-кодами для швидшого запуску.
+## 6. Compiled Files
+*   `__pycache__/` and its contents: Contains compiled Python files (`.pyc`), which are optimized bytecodes for faster startup.

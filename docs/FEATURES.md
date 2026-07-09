@@ -1,21 +1,36 @@
-# Current Features Status (v1.0)
+# Features
 
-This document outlines the functionalities currently implemented in Project Locus.
+## Current Feature Set
 
-### 🧠 Core Engine & AI
-* **Neural Network Integration:** Intent classification using a model trained on a custom `intents.json` dataset.
-* **NLP Preprocessing:** Text tokenization and stemming powered by `nltk` for accurate pattern matching.
-* **Automated Training:** Built-in training module that allows the "brain" to update and reload without restarting the entire application.
+### Core AI
 
-### 🎙️ Voice & Interaction
-* **Background Listener:** Multithreaded voice capture that monitors for the "Locus" wake word without blocking the UI.
-* **Manual Activation:** "Click-to-listen" feature via GUI for environments where voice triggers might be impractical.
-* **Dynamic UI Feedback:** A `tkinter`-based interface that changes visual states (images and labels) to reflect if the bot is Listening, Thinking, or Training.
+- Offline intent classifier trained from a custom `intents.json` dataset
+- NLTK-based tokenization, stemming, and bag-of-words preprocessing
+- Automatic retraining on startup followed by model reload
 
-### 🌐 Browser & Profile Management
-* **Intent-Based Actions:** Capability to recognize and execute commands like opening browsers or specific websites (YouTube).
-* **Profile Switching:** Specialized logic to launch applications with specific user profiles (e.g., Anton, Mr. Clean, Default).
+### Voice Interaction
 
-### 🛠️ Technical Architecture
-* **Multithreading:** Separation of the GUI thread from processing tasks to ensure a smooth, lag-free user experience.
-* **Modular Design:** Separated concerns between UI management (`ui_manager.py`), logic processing (`processor.py`), and neural network structure (`model.py`).
+- Background wake-word listener
+- Manual click-to-listen activation
+- Speech-to-text processing through `speech_recognition`
+- Context-aware follow-up flow for profile selection
+
+### Actions
+
+- Open Chrome with selected user profiles
+- Open YouTube with selected user profiles
+- Exit command handling
+- Gemini fallback for unsupported or conversational requests
+
+### User Interface
+
+- Tkinter desktop window
+- Animated state transitions between cat images
+- Listening visualizer
+- Runtime settings dialog for language and wake words
+
+## Feature Status Notes
+
+- Wake words currently default to `locus`, `local`, `locust`, and `focus`.
+- Chrome profile support currently maps to Anton, Mr Clean, and Default.
+- Settings updates apply only to the current session.

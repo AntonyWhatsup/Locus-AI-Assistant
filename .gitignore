@@ -12,3 +12,4 @@ __pycache__/
 # Файли моделі та логів
 data.pth
 *.log
+.aider*

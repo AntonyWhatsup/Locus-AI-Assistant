@@ -1,83 +1,79 @@
 # Locus AI Assistant
 
-Locus is a desktop AI voice assistant with a visual cat theme. It classifies user intent using a lightweight offline feedforward neural network, falling back to Google's Gemini API for conversational prompts.
+Locus is a desktop voice assistant built with Python, Tkinter, PyTorch, and Google Gemini. It combines a small offline intent classifier with Gemini fallback responses and a cat-themed UI.
 
-## 📖 Origin Story
+## Documentation Map
 
-Locus was originally conceived as a university project for a "Neural Networks" course. The core vision was to bridge the gap between complex technology and everyday users, specifically focusing on accessibility. The goal was to create a tool that simplifies device interaction and empowers individuals with special needs through intuitive voice control.
+- [User Guide](docs/USER_GUIDE.md): how to run and use the assistant
+- [Technical Information](docs/TECHNICAL_INFO.md): architecture, modules, and runtime flow
+- [Features](docs/FEATURES.md): current capabilities and status
+- [Ideas](docs/ideas.md): future improvements and expansion ideas
+- [Legacy Setup Notes](Read.me): original setup notes preserved for reference
 
-The name **Locus** was suggested by a colleague, drawing inspiration from the ancient mnemonic strategy known as the **Method of Loci** (often referred to as the *Memory Palace* technique). Just as a memory palace allows a person to effortlessly recall information by mentally navigating a familiar physical space, Locus is designed to help users navigate their digital environment. It acts as a cognitive extension—allowing users to simply speak their intent and instantly retrieve or activate the right tool in their "digital palace." What started as an academic assignment has evolved into a mission to make human-computer interaction as natural as recalling a memory.
+## Project Summary
 
----
+- Wake-word activation with manual click-to-listen fallback
+- Offline intent recognition backed by a small neural network
+- Gemini responses for unsupported or conversational queries
+- Chrome and YouTube launch flows with per-profile selection
+- Animated cat-state UI for feedback during listening and processing
 
-## 📁 Project Structure
+## Project Structure
 
-```
+```text
 Locus_AI_Assistant/
-├── main.py                    # Root entry point
-├── README.md                  # Project overview and documentation
-├── FEATURES.md                # Features status checklist
-├── Read.me                    # Quick install instructions (raw notes)
-├── .gitignore                 # Git ignored directories/files
-├── assets/                    # Graphical cat image states
-├── data/                      # Trained neural network weights
-│   └── data.pth               # Generated training output
-├── scripts/                   # Utility and diagnostic scripts
-│   └── debug_gemini.py        # Verification script for Gemini API key
-└── src/                       # Main application source code
-    ├── __init__.py
-    ├── config.py              # Configuration & Chrome Profile constants
-    ├── ui_manager.py          # Tkinter window & visual transitions
-    ├── actions.py             # OS actions & Gemini query handler
-    ├── processor.py           # Audio capture & intent execution
-    └── brain/                 # Deep Learning & NLP components
-        ├── __init__.py
-        ├── model.py           # Neural network model definition
-        ├── nltk_utils.py      # Natural language preprocessing
-        ├── trainer_module.py  # Intent classifier training pipeline
-        └── intents.json       # Training samples and classes dataset
+|-- main.py
+|-- README.md
+|-- Read.me
+|-- assets/
+|-- docs/
+|-- logs/
+|-- scripts/
+`-- src/
 ```
 
----
+## Quick Start
 
-## 🛠️ Installation & Setup
+1. Create a virtual environment:
 
-1. **Python Virtual Environment:**
-   ```bash
+   ```powershell
    python -m venv .venv
    .\.venv\Scripts\activate
    ```
 
-2. **Dependencies:**
-   Install required libraries:
-   ```bash
+2. Install dependencies:
+
+   ```powershell
    pip install torch torchvision torchaudio nltk numpy speechrecognition pyaudio pillow python-dotenv google-generativeai
    ```
 
-3. **NLTK Data:**
-   Download tokenization dictionaries:
-   ```bash
+3. Download the NLTK tokenizer data:
+
+   ```powershell
    python -m nltk.downloader punkt_tab
    ```
 
-4. **Environment Variables:**
-   Create a `.env` file at the root directory and add your Google Gemini API key:
+4. Create a `.env` file in the project root:
+
    ```env
-   GEMINI_KEY=your_gemini_api_key_here
+   GEMINI_KEY=your_google_gemini_api_key_here
    ```
 
----
+5. Run the app:
 
-## 🚀 Running Locus
+   ```powershell
+   python main.py
+   ```
 
-Start the assistant by executing the main script:
-```bash
-python main.py
-```
+## Requirements
 
-### Usage
-- On startup, the assistant dynamically updates and trains the Neural Network on your custom `intents.json`.
-- Speak the wake word **"Locus"** (or local, locust, focus) or **left-click the cat image** to trigger manual listening mode.
-- Give a voice command (e.g. *"Open YouTube"*). The assistant will ask you which Chrome profile to load (e.g. *"Anton"* or *"Clean"*).
-- General conversation falls back to the Google Gemini LLM, which behaves like a sarcastic, funny cat assistant.
+- Python 3.10+
+- Windows
+- Working microphone
+- Google Gemini API key
 
+## Notes
+
+- The model retrains on startup from `src/brain/intents.json`.
+- Runtime settings changed in the UI are not written back to `src/config.py`.
+- Logs are stored in the project-local `logs/` directory.

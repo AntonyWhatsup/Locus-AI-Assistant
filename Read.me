@@ -1,19 +1,50 @@
-встановити ці залежності
-pip install torch torchvision torchaudio nltk numpy speechrecognition pyaudio
+# Legacy Setup Notes
 
-Відкрий термінал у папці D:\GitFile\Sieci-neuronowe і виконай:
+This file preserves the original quick-start notes that existed before the documentation was reorganized.
+
+## Original Setup Steps
+
+1. Install the main dependencies:
+
+   ```powershell
+   pip install torch torchvision torchaudio nltk numpy speechrecognition pyaudio
+   ```
+
+2. Download the NLTK tokenizer data:
+
+   ```powershell
+   python -m nltk.downloader punkt_tab
+   ```
+
+3. Install Pillow if it is not already included in your environment:
+
+   ```powershell
+   pip install pillow
+   ```
+
+4. Create a virtual environment:
+
+   ```powershell
+   python -m venv .venv
+   ```
+
+5. Activate the virtual environment:
+
+   ```powershell
+   .\.venv\Scripts\activate
+   ```
+
+## Historical Git Notes
+
+These commands appear to be from the original project bootstrapping phase and are no longer part of normal setup:
+
+```powershell
 git init
 git add .
 git commit -m "Initial commit: structure setup"
 git checkout -b v0.0.1
+```
 
-на словник
-python -m nltk.downloader punkt_tab
+## Current Recommendation
 
-pip install pillow
-
-віртуалка для пайтона 
-python -m venv .venv
-
-активація вірти 
-.\.venv\Scripts\activate
+Use [README.md](README.md) as the entry point and the files in `docs/` for focused documentation.

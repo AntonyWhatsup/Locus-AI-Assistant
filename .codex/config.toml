@@ -1,0 +1,13 @@
+[[hooks.UserPromptSubmit]]
+matcher = "*"
+
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "py \"D:\\GitFile\\Locus_AI_Assistant\\.codex\\hooks\\log_hook.py\""
+
+[[hooks.Stop]]
+matcher = "*"
+
+[[hooks.Stop.hooks]]
+type = "command"
+command = "py \"D:\\GitFile\\Locus_AI_Assistant\\.codex\\hooks\\log_hook.py\""

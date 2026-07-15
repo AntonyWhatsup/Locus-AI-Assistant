@@ -16,6 +16,7 @@ Locus is a desktop voice assistant built with Python, Tkinter, PyTorch, and Goog
 - Offline intent recognition backed by a small neural network
 - Gemini responses for unsupported or conversational queries
 - Chrome and YouTube launch flows with per-profile selection
+- Optional MCP stdio tool calls through a bundled sample server
 - Animated cat-state UI for feedback during listening and processing
 
 ## Project Structure
@@ -64,6 +65,24 @@ Locus_AI_Assistant/
    ```powershell
    python main.py
    ```
+
+## MCP Quick Start
+
+Locus can now call a configured MCP server over stdio.
+
+1. Enable MCP in `data/settings.json`:
+
+   ```json
+   {
+     "mcp_enabled": true,
+     "mcp_server_command": "python scripts/mcp_project_server.py",
+     "mcp_default_tool": "answer_project_question"
+   }
+   ```
+
+2. Start Locus and say `project status` to trigger the bundled `project_status` tool.
+
+3. With the sample server configured as above, low-confidence requests can also route into the default MCP tool before Gemini.
 
 ## Requirements
 

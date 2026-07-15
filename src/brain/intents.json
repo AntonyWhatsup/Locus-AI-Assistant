@@ -26,6 +26,11 @@
       "patterns": ["Open YouTube", "Watch YouTube", "Play video", "Start video", "Youtube"],
       "responses": ["Which profile for YouTube?"]
     },
+    {
+      "tag": "project_status",
+      "patterns": ["Project status", "Check project status", "Repository status", "How is the project going"],
+      "responses": ["Checking the local project through MCP."]
+    },
 
     {
       "tag": "profile_anton",

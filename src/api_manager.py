@@ -26,7 +26,7 @@ class APIManager:
             self.active_connections.remove(websocket)
 
     def _broadcast(self, message: dict):
-        if not self.loop:
+        if not self.loop or not self.loop.is_running():
             return
         
         async def _send():

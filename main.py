@@ -12,7 +12,18 @@ from src.brain.trainer_module import run_training
 from src.actions import reload_gemini_client
 from src.settings_manager import apply_settings, load_settings
 
-app = FastAPI()
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    api_manager.set_loop(asyncio.get_running_loop())
+    apply_settings(load_settings())
+    reload_gemini_client()
+    start_sequence(api_manager)
+    print("Backend ready at http://localhost:8000")
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 def start_sequence(ui):
     ui.root.after(0, lambda: ui.fade_to_image("train"))
@@ -46,14 +57,7 @@ def start_sequence(ui):
 
     threading.Thread(target=task, daemon=True).start()
 
-@app.on_event("startup")
-async def startup_event():
-    api_manager.set_loop(asyncio.get_running_loop())
-    
-    apply_settings(load_settings())
-    reload_gemini_client()
-    start_sequence(api_manager)
-    print("Backend ready at http://localhost:8000")
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

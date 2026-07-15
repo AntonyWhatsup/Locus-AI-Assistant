@@ -18,10 +18,12 @@ const nyanMessages: Record<AppStatus, string> = {
 export default function AssistantPanel({
   theme,
   status,
+  catImage,
   onListen,
 }: {
   theme: Theme
   status: AppStatus
+  catImage: string
   onListen: () => void
 }) {
   const isNyan = theme.name === 'cat'
@@ -44,7 +46,7 @@ export default function AssistantPanel({
           }}
         >
           <img
-            src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=280&h=280&fit=crop&auto=format"
+            src={`/cat_${catImage}.jpg`}
             alt="Assistant cat"
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.9 }}
           />

@@ -12,6 +12,7 @@ export type AppStatus = 'idle' | 'listening' | 'thinking' | 'speaking'
 export default function App() {
   const [themeName, setThemeName] = useState<ThemeName>('glass-green')
   const [status, setStatus] = useState<AppStatus>('idle')
+  const [catImage, setCatImage] = useState<string>('idle')
   const [messages, setMessages] = useState<{from: string, text: string}[]>([
     { from: 'locus', text: 'Backend connecting...' },
   ])
@@ -37,8 +38,11 @@ export default function App() {
           if (data.state === 'error') setStatus('idle')
         }
         if (data.type === 'image') {
+          setCatImage(data.image)
           if (data.image === 'success' || data.image === 'cool') setStatus('speaking')
           if (data.image === 'idle' || data.image === 'error') setStatus('idle')
+          if (data.image === 'listen') setStatus('listening')
+          if (data.image === 'think' || data.image === 'train') setStatus('thinking')
         }
         if (data.type === 'transcript') {
           setMessages(prev => [
@@ -157,7 +161,7 @@ export default function App() {
             overflow: 'auto',
           }}
         >
-          <AssistantPanel theme={theme} status={status} onListen={handleListen} />
+          <AssistantPanel theme={theme} status={status} catImage={catImage} onListen={handleListen} />
           <VoicePanel theme={theme} status={status} />
           <ConversationPanel theme={theme} messages={messages} />
           <SessionPanel theme={theme} />

@@ -1,9 +1,10 @@
 import asyncio
 import threading
-import webbrowser
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
+import os
+import webview
 
 from src.api_manager import api_manager
 from src.processor import background_listener, reload_model, manual_activation
@@ -52,11 +53,7 @@ async def startup_event():
     apply_settings(load_settings())
     reload_gemini_client()
     start_sequence(api_manager)
-    print("Backend ready. Open browser to http://localhost:8000")
-    try:
-        webbrowser.open("http://localhost:8000")
-    except Exception:
-        pass
+    print("Backend ready at http://localhost:8000")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -69,10 +66,15 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         api_manager.disconnect(websocket)
 
-# Optionally serve static files if dist exists
-import os
 if os.path.exists("frontend/dist"):
     app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
 
+def run_server():
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error")
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+    server_thread = threading.Thread(target=run_server, daemon=True)
+    server_thread.start()
+    
+    webview.create_window("Locus AI", "http://127.0.0.1:8000", width=1320, height=820, min_size=(1180, 760))
+    webview.start()

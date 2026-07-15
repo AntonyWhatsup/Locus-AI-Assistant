@@ -32,17 +32,21 @@ THEME_OPTIONS = {
         "label": "Glass Green",
         "description": "Frosted dashboard with neon green accents",
     },
-    "light": {
-        "label": "Light",
-        "description": "Clean and minimal",
-    },
     "dark": {
         "label": "Dark",
         "description": "Low-light focused",
     },
+    "light": {
+        "label": "Light",
+        "description": "Clean and minimal",
+    },
     "colorful": {
         "label": "Colorful",
         "description": "Modern and playful",
+    },
+    "nyan": {
+        "label": "Nyan 🐱",
+        "description": "Vaporwave pink & purple with hot-pink accents",
     },
 }
 

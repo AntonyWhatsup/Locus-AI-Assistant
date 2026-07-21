@@ -8,8 +8,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # API and model configuration
 ENV_PATH = os.path.join(BASE_DIR, ".env")
-GOOGLE_API_KEY = os.getenv("GEMINI_KEY")
-MODEL_NAME = "gemini-flash-latest"
+GOOGLE_API_KEY = os.getenv("GEMINI_KEY") or os.getenv("GEMINI_API_KEY")
+MODEL_NAME = "gemini-2.5-flash"
+GEMINI_TIMEOUT_MS = 15000
+CLOUD_WAKE_LISTENER_ENABLED = os.getenv("LOCUS_ENABLE_CLOUD_WAKE_LISTENER") == "1"
+GEMINI_FALLBACK_ENABLED = os.getenv("LOCUS_ENABLE_GEMINI_FALLBACK") == "1"
 
 # Runtime-configurable settings
 WAKE_WORDS = ["locus", "local", "locust", "focus"]

@@ -4,7 +4,8 @@ import subprocess
 from dataclasses import dataclass
 from functools import lru_cache
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 import src.config as config
 from src.mcp_client import MCPError, call_mcp_tool
@@ -17,7 +18,7 @@ GEMINI_PROMPT_PREFIX = (
 )
 MAX_GEMINI_INPUT_CHARS = 1500
 
-gemini = None
+gemini_client = None
 
 
 @dataclass(frozen=True)
@@ -30,8 +31,8 @@ class GeminiValidationResult:
 def _normalize_model_name(model_name):
     normalized = str(model_name or "").strip()
     if normalized.startswith("models/"):
-        return normalized
-    return f"models/{normalized}"
+        return normalized.removeprefix("models/")
+    return normalized
 
 
 def validate_gemini_configuration(api_key, model_name):
@@ -44,8 +45,12 @@ def validate_gemini_configuration(api_key, model_name):
         return GeminiValidationResult(is_valid=False, model_error="This field is required.")
 
     try:
-        genai.configure(api_key=normalized_key)
-        next(iter(genai.list_models(page_size=1)), None)
+        client = genai.Client(
+            api_key=normalized_key,
+            http_options=types.HttpOptions(timeout=config.GEMINI_TIMEOUT_MS),
+        )
+        models = client.models.list()
+        next(iter(models), None)
     except Exception as exc:
         return GeminiValidationResult(
             is_valid=False,
@@ -53,7 +58,7 @@ def validate_gemini_configuration(api_key, model_name):
         )
 
     try:
-        genai.get_model(_normalize_model_name(normalized_model))
+        client.models.get(model=_normalize_model_name(normalized_model))
     except Exception as exc:
         return GeminiValidationResult(
             is_valid=False,
@@ -64,20 +69,22 @@ def validate_gemini_configuration(api_key, model_name):
 
 
 def reload_gemini_client():
-    global gemini
-    gemini = None
+    global gemini_client
+    gemini_client = None
 
     if not config.GOOGLE_API_KEY:
         return None
 
     try:
-        genai.configure(api_key=config.GOOGLE_API_KEY)
-        gemini = genai.GenerativeModel(config.MODEL_NAME)
+        gemini_client = genai.Client(
+            api_key=config.GOOGLE_API_KEY,
+            http_options=types.HttpOptions(timeout=config.GEMINI_TIMEOUT_MS),
+        )
     except Exception as exc:
         print(f"Gemini Init Error: {exc}")
-        gemini = None
+        gemini_client = None
 
-    return gemini
+    return gemini_client
 
 
 def _extract_gemini_text(response):
@@ -98,7 +105,7 @@ def _extract_gemini_text(response):
 
 def ask_gemini(text):
     """Send a query to Gemini and return a short reply."""
-    if not gemini:
+    if not gemini_client:
         return "Meow... I have no brains right now."
 
     cleaned_text = " ".join(str(text).split())
@@ -107,7 +114,10 @@ def ask_gemini(text):
 
     try:
         prompt = f"{GEMINI_PROMPT_PREFIX}\nUser said: {cleaned_text[:MAX_GEMINI_INPUT_CHARS]}"
-        response = gemini.generate_content(prompt)
+        response = gemini_client.models.generate_content(
+            model=_normalize_model_name(config.MODEL_NAME),
+            contents=prompt,
+        )
         reply = _extract_gemini_text(response)
         return reply or "Meow... Google AI replied with an empty answer."
     except Exception as exc:
@@ -143,10 +153,6 @@ def ask_mcp(text=None, tool_name=None, arguments=None):
 @lru_cache(maxsize=1)
 def find_chrome():
     """Search for chrome.exe in standard Windows locations."""
-    path = shutil.which("chrome") or shutil.which("google-chrome")
-    if path:
-        return path
-
     possible_paths = [
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -155,7 +161,7 @@ def find_chrome():
     for possible_path in possible_paths:
         if os.path.exists(possible_path):
             return possible_path
-    return None
+    return shutil.which("chrome") or shutil.which("google-chrome")
 
 
 def _launch_chrome(profile_dir, url=None):
@@ -209,7 +215,7 @@ def execute_command_logic(tag, confidence, active_context):
     if is_mcp_available() and confidence > 0.20:
         return "mcp_request", None
 
-    if confidence > 0.20:
+    if config.GEMINI_FALLBACK_ENABLED and confidence > 0.20:
         return "gemini_request", None
 
     return "unknown", None

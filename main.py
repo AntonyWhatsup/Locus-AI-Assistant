@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 import webview
 
+import src.config as config
 from src.api_manager import api_manager
 from src.processor import background_listener, reload_model, manual_activation
 from src.brain.trainer_module import run_training
@@ -51,9 +52,11 @@ def start_sequence(ui):
 
         ui.root.after(0, lambda: ui.fade_to_image("idle"))
         ui.root.after(0, lambda: ui.set_mic_state("idle", "Ready for the next wake word."))
-        ui.root.after(0, lambda: ui.set_status("Say 'Locus'", "idle", "Click the cat or wait for the wake word."))
-
-        threading.Thread(target=background_listener, args=(ui,), daemon=True).start()
+        if config.CLOUD_WAKE_LISTENER_ENABLED:
+            ui.root.after(0, lambda: ui.set_status("Say 'Locus'", "idle", "Click the cat or wait for the wake word."))
+            threading.Thread(target=background_listener, args=(ui,), daemon=True).start()
+        else:
+            ui.root.after(0, lambda: ui.set_status("Click to listen", "idle", "Cloud wake-word listening is disabled by default."))
 
     threading.Thread(target=task, daemon=True).start()
 

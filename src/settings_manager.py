@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from dataclasses import asdict, dataclass
 from typing import Dict, Mapping, Optional
 
@@ -55,6 +56,8 @@ ANIMATION_SPEED_OPTIONS = {
     "normal": {"label": "Normal"},
     "fast": {"label": "Fast"},
 }
+MODEL_NAME_PATTERN = re.compile(r"^gemini-[a-z0-9][a-z0-9.\-]*$")
+LANGUAGE_CODE_PATTERN = re.compile(r"^[a-z]{2,3}(?:-[A-Z]{2})?$")
 
 
 @dataclass(frozen=True)
@@ -164,7 +167,7 @@ class SettingsService:
 
     def load_gemini_api_key(self):
         env_values = dotenv_values(self.env_path)
-        env_key = env_values.get("GEMINI_KEY")
+        env_key = env_values.get("GEMINI_KEY") or env_values.get("GEMINI_API_KEY")
         if env_key is None:
             return str(config.GOOGLE_API_KEY or "").strip()
         return str(env_key).strip()
@@ -372,6 +375,10 @@ class SettingsService:
 
     def _coerce_required_string(self, value, default, strict, field_name, errors=None):
         normalized = str(value).strip() if value is not None else ""
+        if field_name == "language_code" and normalized and not LANGUAGE_CODE_PATTERN.fullmatch(normalized):
+            normalized = ""
+        if field_name == "gemini_model" and normalized and not MODEL_NAME_PATTERN.fullmatch(normalized):
+            normalized = ""
         if normalized:
             return normalized
         if strict:

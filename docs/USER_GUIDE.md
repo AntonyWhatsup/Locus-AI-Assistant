@@ -2,14 +2,17 @@
 
 ## Purpose
 
-Locus is a desktop voice assistant with a cat-themed interface. It listens for a wake word, handles a small set of commands locally, and sends other requests to Google Gemini.
+Locus is a desktop voice assistant with a cat-themed React interface. It handles a small set of commands locally, can call a configured MCP tool, and can optionally send conversational requests to Google Gemini.
 
 ## Before You Start
 
 - Python 3.10 or newer
 - Windows
+- Node.js/npm for building the frontend
 - A working microphone
-- A `.env` file with `GEMINI_KEY`
+- Dependencies installed with `pip install -r requirements.txt`
+- Frontend built with `npm install` and `npm run build` inside `frontend/`
+- A `.env` file with `GEMINI_KEY` or `GEMINI_API_KEY` if Gemini features are used
 
 ## Starting the App
 
@@ -21,17 +24,18 @@ python main.py
 
 Startup flow:
 
-1. The Tkinter window opens.
-2. The local intent model retrains from `src/brain/intents.json`.
-3. The new model is loaded.
-4. The UI returns to idle.
-5. Background wake-word listening begins.
+1. FastAPI starts on `127.0.0.1:8000`.
+2. PyWebView opens the local React UI.
+3. The local intent model retrains only if `data/data.pth` is missing or stale.
+4. The model is loaded.
+5. Optional background wake-word listening starts only when `LOCUS_ENABLE_CLOUD_WAKE_LISTENER=1`.
 
 ## How To Activate Locus
 
-- Say `Locus`
-- Similar words may also trigger it: `local`, `locust`, `focus`
-- Left-click the cat image to manually start listening
+- Click the listen control in the UI.
+- Optionally say `Locus`, `local`, `locust`, or `focus` after enabling `LOCUS_ENABLE_CLOUD_WAKE_LISTENER=1`.
+
+By default, manual activation is the privacy-preserving path. Cloud wake-word listening uses Google Speech Recognition before the wake word is known. General Gemini fallback for unsupported dictated text is also opt-in via `LOCUS_ENABLE_GEMINI_FALLBACK=1`.
 
 ## Supported Commands
 
@@ -42,33 +46,21 @@ Startup flow:
 | `Anton`, `Anthony`, `Tony` | Selects the Anton profile |
 | `Clean`, `Mr Clean` | Selects the Mr Clean profile |
 | `Default`, `Normal`, `Main` | Selects the default profile |
+| `Project status` | Calls the bundled MCP status tool when configured |
 | `How are you?` | Sends a short playful request to Gemini |
 | `Bye`, `Goodbye`, `Exit` | Closes the application |
-| Other recognized speech | Sent to Gemini for a short response |
-
-## UI States
-
-| State | Meaning |
-|---|---|
-| `idle` | Waiting for the wake word |
-| `listen` | Capturing voice input |
-| `think` | Processing speech or waiting for profile selection |
-| `train` | Retraining the local model |
-| `cool` | Handling a casual Gemini-style response |
-| `success` | Command completed |
-| `error` | Audio or microphone issue |
+| Other recognized speech | Can route to MCP, or to Gemini only when opt-in fallback is enabled |
 
 ## Troubleshooting
 
 - If the microphone fails, verify device access and Windows audio permissions.
-- If Gemini replies fail, confirm `GEMINI_KEY` is set correctly in `.env`.
+- If Gemini replies fail, confirm `GEMINI_KEY` or `GEMINI_API_KEY` is set correctly in `.env`.
 - If Chrome does not open, check the profile mapping in `src/config.py`.
+- If the UI is blank, run `npm install` and `npm run build` in `frontend/`.
 - If the app does not recognize expected commands, review `src/brain/intents.json`.
 
-## Where To Edit Behavior
+## Local Verification
 
-- Intent phrases: `src/brain/intents.json`
-- Runtime config defaults: `src/config.py`
-- Command handling: `src/actions.py`
-- Voice processing: `src/processor.py`
-- UI behavior: `src/ui_manager.py`
+```powershell
+python -B -m unittest discover -s tests
+```

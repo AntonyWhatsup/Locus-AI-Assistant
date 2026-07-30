@@ -8,6 +8,7 @@ import speech_recognition as sr
 from dotenv import dotenv_values, set_key
 
 import src.config as config
+from src.ws_protocol import normalize_theme
 
 
 LANGUAGE_OPTIONS = {
@@ -29,7 +30,7 @@ WAKE_WORD_PRESET_OPTIONS = {
 }
 
 THEME_OPTIONS = {
-    "glass_green": {
+    "glass-green": {
         "label": "Glass Green",
         "description": "Frosted dashboard with neon green accents",
     },
@@ -45,7 +46,7 @@ THEME_OPTIONS = {
         "label": "Colorful",
         "description": "Modern and playful",
     },
-    "nyan": {
+    "cat": {
         "label": "Nyan 🐱",
         "description": "Vaporwave pink & purple with hot-pink accents",
     },
@@ -55,6 +56,10 @@ ANIMATION_SPEED_OPTIONS = {
     "slow": {"label": "Slow"},
     "normal": {"label": "Normal"},
     "fast": {"label": "Fast"},
+}
+AI_MODEL_OPTIONS = {
+    "local": {"label": "Local model"},
+    "gemini": {"label": "Gemini fallback"},
 }
 MODEL_NAME_PATTERN = re.compile(r"^gemini-[a-z0-9][a-z0-9.\-]*$")
 LANGUAGE_CODE_PATTERN = re.compile(r"^[a-z]{2,3}(?:-[A-Z]{2})?$")
@@ -67,6 +72,13 @@ class Settings:
     gemini_model: str
     theme: str
     animation_speed: str
+    microphone_sensitivity: int
+    auto_listen_on_startup: bool
+    show_live_transcript: bool
+    ai_model: str
+    tts_voice: str
+    debug_mode: bool
+    local_intent_cache: bool
     microphone_device_id: str
     output_audio_device_id: str
     mcp_server_command: str
@@ -80,8 +92,15 @@ class Settings:
             language_code=str(defaults["language_code"]),
             wake_words=list(defaults["wake_words"]),
             gemini_model=str(defaults["gemini_model"]),
-            theme=str(defaults["theme"]),
+            theme=normalize_theme(defaults["theme"]),
             animation_speed=str(defaults["animation_speed"]),
+            microphone_sensitivity=int(defaults["microphone_sensitivity"]),
+            auto_listen_on_startup=bool(defaults["auto_listen_on_startup"]),
+            show_live_transcript=bool(defaults["show_live_transcript"]),
+            ai_model=str(defaults["ai_model"]),
+            tts_voice=str(defaults["tts_voice"]),
+            debug_mode=bool(defaults["debug_mode"]),
+            local_intent_cache=bool(defaults["local_intent_cache"]),
             microphone_device_id=str(defaults["microphone_device_id"]),
             output_audio_device_id=str(defaults["output_audio_device_id"]),
             mcp_server_command=str(defaults["mcp_server_command"]),
@@ -158,6 +177,15 @@ class SettingsService:
         config.MODEL_NAME = normalized.gemini_model
         config.THEME = normalized.theme
         config.ANIMATION_SPEED = normalized.animation_speed
+        config.MICROPHONE_SENSITIVITY = normalized.microphone_sensitivity
+        config.AUTO_LISTEN_ON_STARTUP = normalized.auto_listen_on_startup
+        config.CLOUD_WAKE_LISTENER_ENABLED = normalized.auto_listen_on_startup
+        config.SHOW_LIVE_TRANSCRIPT = normalized.show_live_transcript
+        config.AI_MODEL = normalized.ai_model
+        config.GEMINI_FALLBACK_ENABLED = normalized.ai_model == "gemini"
+        config.TTS_VOICE = normalized.tts_voice
+        config.DEBUG_MODE = normalized.debug_mode
+        config.LOCAL_INTENT_CACHE_ENABLED = normalized.local_intent_cache
         config.MICROPHONE_DEVICE_ID = normalized.microphone_device_id
         config.OUTPUT_AUDIO_DEVICE_ID = normalized.output_audio_device_id
         config.MCP_SERVER_COMMAND = normalized.mcp_server_command
@@ -258,6 +286,26 @@ class SettingsService:
             strict,
             "animation_speed",
         )
+        microphone_sensitivity = self._coerce_int_range(
+            raw_settings.get("microphone_sensitivity"),
+            defaults.microphone_sensitivity,
+            0,
+            100,
+            strict,
+            "microphone_sensitivity",
+        )
+        auto_listen_on_startup = self._coerce_bool(
+            raw_settings.get("auto_listen_on_startup"),
+            defaults.auto_listen_on_startup,
+        )
+        show_live_transcript = self._coerce_bool(
+            raw_settings.get("show_live_transcript"),
+            defaults.show_live_transcript,
+        )
+        ai_model = self._coerce_choice(raw_settings.get("ai_model"), defaults.ai_model, AI_MODEL_OPTIONS, strict, "ai_model")
+        tts_voice = self._coerce_optional_string(raw_settings.get("tts_voice"), defaults.tts_voice)
+        debug_mode = self._coerce_bool(raw_settings.get("debug_mode"), defaults.debug_mode)
+        local_intent_cache = self._coerce_bool(raw_settings.get("local_intent_cache"), defaults.local_intent_cache)
         microphone_device_id = self._coerce_audio_device(
             raw_settings.get("microphone_device_id"),
             defaults.microphone_device_id,
@@ -291,6 +339,13 @@ class SettingsService:
             gemini_model=gemini_model,
             theme=theme,
             animation_speed=animation_speed,
+            microphone_sensitivity=microphone_sensitivity,
+            auto_listen_on_startup=auto_listen_on_startup,
+            show_live_transcript=show_live_transcript,
+            ai_model=ai_model,
+            tts_voice=tts_voice,
+            debug_mode=debug_mode,
+            local_intent_cache=local_intent_cache,
             microphone_device_id=microphone_device_id,
             output_audio_device_id=output_audio_device_id,
             mcp_server_command=mcp_server_command,
@@ -328,6 +383,27 @@ class SettingsService:
             "animation_speed",
             errors,
         )
+        microphone_sensitivity = self._coerce_int_range(
+            raw_settings.get("microphone_sensitivity"),
+            defaults.microphone_sensitivity,
+            0,
+            100,
+            True,
+            "microphone_sensitivity",
+            errors,
+        )
+        auto_listen_on_startup = self._coerce_bool(
+            raw_settings.get("auto_listen_on_startup"),
+            defaults.auto_listen_on_startup,
+        )
+        show_live_transcript = self._coerce_bool(
+            raw_settings.get("show_live_transcript"),
+            defaults.show_live_transcript,
+        )
+        ai_model = self._coerce_choice(raw_settings.get("ai_model"), defaults.ai_model, AI_MODEL_OPTIONS, True, "ai_model", errors)
+        tts_voice = self._coerce_optional_string(raw_settings.get("tts_voice"), defaults.tts_voice)
+        debug_mode = self._coerce_bool(raw_settings.get("debug_mode"), defaults.debug_mode)
+        local_intent_cache = self._coerce_bool(raw_settings.get("local_intent_cache"), defaults.local_intent_cache)
         microphone_device_id = self._coerce_audio_device(
             raw_settings.get("microphone_device_id"),
             defaults.microphone_device_id,
@@ -364,6 +440,13 @@ class SettingsService:
                 gemini_model=gemini_model,
                 theme=theme,
                 animation_speed=animation_speed,
+                microphone_sensitivity=microphone_sensitivity,
+                auto_listen_on_startup=auto_listen_on_startup,
+                show_live_transcript=show_live_transcript,
+                ai_model=ai_model,
+                tts_voice=tts_voice,
+                debug_mode=debug_mode,
+                local_intent_cache=local_intent_cache,
                 microphone_device_id=microphone_device_id,
                 output_audio_device_id=output_audio_device_id,
                 mcp_server_command=mcp_server_command,
@@ -411,8 +494,41 @@ class SettingsService:
             return bool(default)
         return bool(value)
 
+    def _coerce_int_range(self, value, default, minimum, maximum, strict, field_name, errors=None):
+        if value is None:
+            return default
+        try:
+            normalized = int(value)
+        except (TypeError, ValueError):
+            if strict:
+                errors[field_name] = f"Enter a value from {minimum} to {maximum}."
+            return default
+
+        if minimum <= normalized <= maximum:
+            return normalized
+
+        if strict:
+            errors[field_name] = f"Enter a value from {minimum} to {maximum}."
+        return default
+
     def _coerce_choice(self, value, default, choices, strict, field_name, errors=None):
-        normalized = str(value).strip()
+        default = normalize_theme(default) if field_name == "theme" else default
+        if value is None:
+            return default
+        if field_name == "theme":
+            raw = str(value or "").strip().replace("_", "-").lower()
+            aliases = {
+                "glass-green": "glass-green",
+                "glassgreen": "glass-green",
+                "dark": "dark",
+                "light": "light",
+                "colorful": "colorful",
+                "nyan": "cat",
+                "cat": "cat",
+            }
+            normalized = aliases.get(raw, "")
+        else:
+            normalized = str(value).strip()
         if normalized in choices:
             return normalized
         if strict:

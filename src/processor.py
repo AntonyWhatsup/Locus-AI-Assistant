@@ -19,6 +19,11 @@ active_context = None
 _MODEL_LOCK = threading.Lock()
 _PROCESSING_LOCK = threading.Lock()
 _is_processing = False
+_cancel_event = threading.Event()
+
+
+class ListeningCancelled(Exception):
+    pass
 
 
 def _set_processing(value):
@@ -79,9 +84,26 @@ def reload_model():
 def manual_activation(ui):
     """Manually trigger listening."""
     if not try_begin_processing():
-        return
+        getattr(ui, "command_ack", lambda *_args: None)("listen", False, "A listening session is already active.")
+        return False
+    _cancel_event.clear()
     print("LOG: Manual activation via click.")
     threading.Thread(target=listen_and_process, args=(ui,), daemon=True).start()
+    getattr(ui, "command_ack", lambda *_args: None)("listen", True, "Listening started.")
+    return True
+
+
+def stop_activation(ui):
+    """Request cooperative cancellation of the active listening session."""
+    if not is_processing():
+        getattr(ui, "command_ack", lambda *_args: None)("stop", False, "No listening session is active.")
+        return False
+    _cancel_event.set()
+    ui.root.after(0, ui.stop_visualizer)
+    ui.root.after(0, lambda: ui.set_mic_state("idle", "Stopping listening..."))
+    ui.root.after(0, lambda: ui.set_status("Stopping", "thinking", "Stopping the current request."))
+    getattr(ui, "command_ack", lambda *_args: None)("stop", True, "Stop requested.")
+    return True
 
 
 def _normalize_level(frame_data, sample_width):
@@ -96,6 +118,8 @@ def _capture_phrase(recognizer, source, ui):
     chunks = []
     stream = recognizer.listen(source, timeout=5, phrase_time_limit=7, stream=True)
     for chunk in stream:
+        if _cancel_event.is_set():
+            raise ListeningCancelled()
         chunks.append(chunk.frame_data)
         level = _normalize_level(chunk.frame_data, chunk.sample_width)
         ui.root.after(0, lambda lvl=level: ui.update_mic_level(lvl))
@@ -192,6 +216,8 @@ def listen_and_process(ui):
         recognizer.pause_threshold = 1.0
 
         while True:
+            if _cancel_event.is_set():
+                raise ListeningCancelled()
             if active_context:
                 ui.root.after(0, lambda: ui.set_status("Which profile?", "prompt", "Choose a Chrome profile to continue."))
                 ui.root.after(0, lambda: ui.fade_to_image("think"))
@@ -208,6 +234,8 @@ def listen_and_process(ui):
                         recognizer.adjust_for_ambient_noise(source, duration=0.2)
 
                     audio = _capture_phrase(recognizer, source, ui)
+                    if _cancel_event.is_set():
+                        raise ListeningCancelled()
                     ui.root.after(0, ui.stop_visualizer)
 
                     ui.root.after(0, lambda: ui.set_status("Thinking...", "thinking", "Processing your request..."))
@@ -215,6 +243,8 @@ def listen_and_process(ui):
                     ui.root.after(0, lambda: ui.fade_to_image("think"))
 
                     text = recognizer.recognize_google(audio, language=config.LANG_CODE).strip()
+                    if _cancel_event.is_set():
+                        raise ListeningCancelled()
                     if not text:
                         raise sr.UnknownValueError()
                     ui.root.after(0, lambda captured=text: ui.set_transcript(user_text=captured))
@@ -306,6 +336,10 @@ def listen_and_process(ui):
             except sr.UnknownValueError:
                 _handle_unknown_phrase(ui)
                 continue
+            except ListeningCancelled:
+                print("LOG: Listening stopped by user.")
+                clear_context_on_exit = True
+                break
             except Exception as exc:
                 _handle_unexpected_error(ui, exc)
                 clear_context_on_exit = True
@@ -314,6 +348,7 @@ def listen_and_process(ui):
         if clear_context_on_exit:
             clear_active_context()
         finish_processing()
+        _cancel_event.clear()
         _restore_idle_ui(ui)
 
 

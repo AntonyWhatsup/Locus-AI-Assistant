@@ -1,67 +1,110 @@
+import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../themes'
-import type { AppStatus } from '../App'
+import type { AppStatus, ConnectionStatus } from '../App'
 
 const catMessages: Record<AppStatus, string> = {
+  initializing: 'Starting',
   idle: 'Go ahead',
   listening: 'Listening...',
-  thinking: '...',
+  processing: '...',
   speaking: 'Say that again!',
+  error: 'Check status',
 }
 
 const nyanMessages: Record<AppStatus, string> = {
+  initializing: 'bootin',
   idle: 'can i haz?',
   listening: 'im listenin',
-  thinking: 'big thonk...',
+  processing: 'big thonk...',
   speaking: 'meow meow',
+  error: 'halp',
 }
 
 export default function AssistantPanel({
   theme,
   status,
   catImage,
+  statusTitle,
+  statusText,
+  connectionStatus,
   onListen,
+  onOpenSettings,
 }: {
   theme: Theme
   status: AppStatus
   catImage: string
+  statusTitle: string
+  statusText: string
+  connectionStatus: ConnectionStatus
   onListen: () => void
+  onOpenSettings: () => void
 }) {
   const isNyan = theme.name === 'cat'
   const overlayText = isNyan ? nyanMessages[status] : catMessages[status]
+  const [imageMissing, setImageMissing] = useState(false)
+  const canListen = status === 'idle' || status === 'error'
+  const canStop = status === 'listening'
+  const disabled = connectionStatus !== 'connected' || (!canListen && !canStop)
+  const buttonLabel = canStop ? 'Stop' : status === 'processing' || status === 'initializing' ? 'Processing' : 'Listen'
+  const imageSrc = `/cat_${catImage}.jpg`
+
+  useEffect(() => {
+    setImageMissing(false)
+  }, [imageSrc])
 
   return (
-    <Panel theme={theme} title={isNyan ? '\u{1F431} Assistant' : 'Assistant'} action="Click the cat to wake it">
+    <Panel theme={theme} title={isNyan ? 'Cat Assistant' : 'Assistant'} action={connectionStatus === 'connected' ? 'Local session' : 'Offline'}>
       <div style={{ display: 'flex', gap: 16, height: '100%' }}>
-        {/* Cat image area */}
-        <div
+        <button
           onClick={onListen}
+          disabled={disabled}
+          aria-label={canStop ? 'Stop listening' : 'Start listening'}
           style={{
-            width: 140,
+            width: 'clamp(132px, 32%, 190px)',
+            aspectRatio: '1 / 1',
             flexShrink: 0,
             borderRadius: 10,
             overflow: 'hidden',
-            cursor: 'pointer',
+            cursor: disabled ? 'not-allowed' : 'pointer',
             position: 'relative',
-            background: '#0a1a0c',
+            background: `linear-gradient(145deg, ${theme.inputBg}, ${theme.panelBg})`,
+            border: 'none',
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <img
-            src={`/cat_${catImage}.jpg`}
-            alt="Assistant cat"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.9 }}
-          />
-          {/* Overlay label */}
           <div
             style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              padding: '20px 10px 10px',
-              background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+              flex: 1,
+              minHeight: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              padding: 8,
+            }}
+          >
+            {imageMissing ? (
+              <span style={{ color: theme.subtext, fontSize: 12, fontWeight: 700 }}>Image unavailable</span>
+            ) : (
+              <img
+                src={imageSrc}
+                alt="Assistant cat"
+                onError={() => setImageMissing(true)}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', opacity: 0.95 }}
+              />
+            )}
+          </div>
+          <div
+            style={{
+              flexShrink: 0,
+              minHeight: 30,
+              padding: '6px 8px',
+              background: 'rgba(0,0,0,0.36)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderTop: `1px solid ${theme.panelBorder}`,
             }}
           >
             <span
@@ -70,46 +113,48 @@ export default function AssistantPanel({
                 fontWeight: 800,
                 fontSize: 14,
                 textShadow: `0 0 12px ${theme.accent}`,
-                letterSpacing: '0.02em',
+                letterSpacing: 0,
               }}
             >
               {overlayText}
             </span>
           </div>
-        </div>
+        </button>
 
-        {/* Control deck */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div>
             <p style={{ fontSize: 13, fontWeight: 600, color: theme.text, marginBottom: 2 }}>Control Deck</p>
             <p style={{ fontSize: 11, color: theme.subtext, lineHeight: 1.4 }}>
-              Manual wake, visual status, and wake-word cues live here.
+              {statusTitle}: {statusText}
             </p>
           </div>
 
           <button
             onClick={onListen}
+            disabled={disabled}
             style={{
-              background: status === 'idle' ? theme.listenBtn : `${theme.accent}44`,
-              color: status === 'idle' ? theme.listenBtnText : theme.accentText,
+              background: canListen ? theme.listenBtn : `${theme.accent}44`,
+              color: canListen ? theme.listenBtnText : theme.accentText,
               border: `1px solid ${theme.accent}`,
               borderRadius: 8,
               padding: '10px 0',
               fontWeight: 700,
               fontSize: 13,
-              cursor: 'pointer',
-              letterSpacing: '0.04em',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              opacity: disabled ? 0.6 : 1,
+              letterSpacing: 0,
               transition: 'all 0.25s ease',
-              boxShadow: status === 'idle' ? `0 0 16px ${theme.accent}44` : 'none',
+              boxShadow: canListen ? `0 0 16px ${theme.accent}44` : 'none',
             }}
           >
-            {status === 'idle' ? 'Listen' : 'Stop'}
+            {buttonLabel}
           </button>
 
           <button
+            onClick={onOpenSettings}
             style={{
               background: theme.inputBg,
-              color: theme.subtext,
+              color: theme.text,
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               padding: '9px 0',
@@ -133,7 +178,7 @@ export default function AssistantPanel({
               }}
             />
             <span style={{ fontSize: 11, color: theme.accentText, fontWeight: 500 }}>
-              Wake Word Ready
+              {connectionStatus === 'connected' ? 'Local Link Ready' : 'Reconnecting'}
             </span>
           </div>
         </div>
@@ -153,7 +198,7 @@ export function Panel({
   title: string
   action?: string
   actionColor?: string
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <div
@@ -174,7 +219,7 @@ export function Panel({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>{title}</span>
         {action && (
-          <span style={{ fontSize: 11, color: actionColor || theme.accentText, fontWeight: 500, cursor: 'pointer' }}>
+          <span style={{ fontSize: 11, color: actionColor || theme.accentText, fontWeight: 500 }}>
             {action}
           </span>
         )}

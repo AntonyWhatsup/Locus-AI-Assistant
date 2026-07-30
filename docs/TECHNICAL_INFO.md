@@ -25,7 +25,60 @@ main.py
           -> tokenize + bag_of_words
           -> NeuralNet inference
           -> execute_command_logic()
+  -> websocket / stop action
+      -> stop_activation()
+      -> cooperative cancellation event
 ```
+
+## WebSocket Security Model
+
+`/ws` is protected by two local checks:
+
+- Origin allowlist. Default allowed origins are `http://127.0.0.1:8000`, `http://localhost:8000`, `http://127.0.0.1:8443`, and `http://localhost:8443`. Add development origins with `LOCUS_ALLOWED_WS_ORIGINS`.
+- Per-run session token. `main.py` generates a token at startup and serves it to allowed frontend origins through `/api/session`. The browser WebSocket connects with `/ws?token=...`.
+
+The token is compatible with the browser WebSocket API and PyWebView because it is sent as a query parameter. It is runtime-only and must not be committed. `LOCUS_WS_TOKEN` exists only for controlled local testing.
+
+Client commands are intentionally small:
+
+```json
+{"action":"listen"}
+{"action":"stop"}
+```
+
+Invalid JSON, unknown actions, and unsupported fields return an `error` event. They do not start microphone capture.
+
+## WebSocket Event Contract
+
+The backend sends a full `snapshot` immediately after WebSocket connection, then incremental events:
+
+| Type | Purpose |
+|---|---|
+| `snapshot` | Full UI recovery state: app state, status, mic state, image, mic level, visualizer, transcript, settings |
+| `status` | User-facing status title, tone, and text |
+| `mic_state` | Microphone state and detail message |
+| `transcript` | Latest user and/or Locus text |
+| `image` | Cat image state name |
+| `mic_level` | Normalized microphone level from `0` to `1` |
+| `visualizer` | Start/stop visualizer state and optional label |
+| `command_ack` | Accepted/rejected command result |
+| `error` | Controlled protocol error |
+| `conversation_cleared` | Conversation panel should clear local history |
+
+Canonical app states are `initializing`, `ready`, `listening`, `processing`, `speaking`, and `error`.
+
+## Settings API
+
+The Settings slide-over uses HTTP endpoints rather than separate WebSocket commands:
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/settings` | Load persisted runtime settings from `data/settings.json` or defaults |
+| `GET /api/settings/options` | Load supported languages, themes, AI model metadata, and unavailable TTS state |
+| `POST /api/settings` | Validate, save, and apply settings; requires `X-Locus-Session` |
+| `POST /api/conversation/clear` | Clear the current conversation snapshot; requires `X-Locus-Session` |
+
+Settings are validated by `src/settings_manager.py` before writing. Secrets are not returned from these endpoints. Gemini fallback can be selected only when `GEMINI_KEY` or `GEMINI_API_KEY` is configured.
 
 ## Main Modules
 
@@ -33,6 +86,7 @@ main.py
 
 - Loads `data/data.pth` with `weights_only=True`
 - Uses a processing lock to prevent overlapping microphone sessions
+- Uses a cooperative cancellation event for the `stop` command
 - Clears stale profile-selection context after timeout or unexpected errors
 - Uses `torch.inference_mode()` during classification
 - Keeps cloud wake-word listening opt-in

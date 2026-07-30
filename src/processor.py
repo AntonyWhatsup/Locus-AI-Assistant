@@ -45,11 +45,16 @@ def finish_processing():
     _set_processing(False)
 
 
+def clear_active_context():
+    global active_context
+    active_context = None
+
+
 def reload_model():
     """Load the trained model from disk."""
     global model, all_words, tags
     try:
-        data = torch.load(config.MODEL_DATA_PATH, map_location=device)
+        data = torch.load(config.MODEL_DATA_PATH, map_location=device, weights_only=True)
         required_keys = {"model_state", "input_size", "hidden_size", "output_size", "all_words", "tags"}
         if not isinstance(data, dict) or not required_keys.issubset(data):
             raise ValueError("Model file is missing required fields.")
@@ -140,7 +145,10 @@ def _restore_idle_ui(ui):
     ui.root.after(0, ui.stop_visualizer)
     ui.root.after(0, lambda: ui.fade_to_image("idle"))
     ui.root.after(0, lambda: ui.set_mic_state("idle", "Ready for the next wake word."))
-    ui.root.after(0, lambda: ui.set_status("Say 'Locus'", "idle", "Left-click the cat or wait for the wake word."))
+    if config.CLOUD_WAKE_LISTENER_ENABLED:
+        ui.root.after(0, lambda: ui.set_status("Say 'Locus'", "idle", "Click the cat or wait for the wake word."))
+    else:
+        ui.root.after(0, lambda: ui.set_status("Click to listen", "idle", "Cloud wake-word listening is disabled by default."))
 
 
 def _handle_microphone_error(ui, mic_err):
@@ -170,6 +178,7 @@ def _handle_unexpected_error(ui, exc):
 
 def listen_and_process(ui):
     global active_context
+    clear_context_on_exit = False
     try:
         with _MODEL_LOCK:
             model_ready = model is not None and all_words is not None and tags is not None
@@ -292,19 +301,26 @@ def listen_and_process(ui):
                 break
             except sr.WaitTimeoutError:
                 print("LOG: Listening timed out.")
+                clear_context_on_exit = True
                 break
             except sr.UnknownValueError:
                 _handle_unknown_phrase(ui)
                 continue
             except Exception as exc:
                 _handle_unexpected_error(ui, exc)
+                clear_context_on_exit = True
                 break
     finally:
+        if clear_context_on_exit:
+            clear_active_context()
         finish_processing()
         _restore_idle_ui(ui)
 
 
 def background_listener(ui):
+    if not config.CLOUD_WAKE_LISTENER_ENABLED:
+        return
+
     recognizer = sr.Recognizer()
     recognizer.pause_threshold = 0.8
 

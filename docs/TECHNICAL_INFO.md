@@ -2,20 +2,25 @@
 
 ## Architecture Overview
 
-Locus is a local desktop application composed of four main layers:
+Locus is a local desktop application composed of five main layers:
 
-1. `main.py` boots the UI, triggers retraining, reloads the model, and starts the background listener.
-2. `src/ui_manager.py` owns the Tkinter window, image transitions, settings dialog, and visual feedback.
-3. `src/processor.py` captures microphone input, runs inference, and coordinates UI state changes.
-4. `src/actions.py` resolves recognized intents into browser actions, Gemini requests, or exit behavior.
+1. `main.py` starts FastAPI, serves the React build, opens PyWebView, prepares the local model, and optionally starts wake-word listening.
+2. `frontend/` contains the React UI that connects to the backend over WebSocket.
+3. `src/api_manager.py` broadcasts backend state changes to connected UI clients.
+4. `src/processor.py` captures microphone input, runs local inference, and coordinates command handling.
+5. `src/actions.py` resolves recognized intents into Chrome actions, MCP calls, Gemini calls, or exit behavior.
 
 ## Runtime Flow
 
 ```text
 main.py
-  -> run_training()
+  -> apply_settings()
+  -> reload_gemini_client()
+  -> run_training() when model data is missing or stale
   -> reload_model()
-  -> background_listener()
+  -> background_listener() only when LOCUS_ENABLE_CLOUD_WAKE_LISTENER=1
+  -> websocket / listen action
+      -> manual_activation()
       -> listen_and_process()
           -> tokenize + bag_of_words
           -> NeuralNet inference
@@ -24,78 +29,45 @@ main.py
 
 ## Main Modules
 
-### `main.py`
-
-- Initializes the Tkinter root window
-- Creates the `LocusUI` instance
-- Binds left-click manual activation
-- Starts training and the background listener sequence
-
-### `src/ui_manager.py`
-
-- Displays cat-state images from `assets/`
-- Animates transitions with `fade_to_image()`
-- Shows a simple level visualizer while listening
-- Exposes a settings dialog for runtime-only updates to language and wake words
-
 ### `src/processor.py`
 
-- Loads the trained model from `data/data.pth`
-- Uses `speech_recognition` for audio capture and speech-to-text
-- Converts text into bag-of-words vectors
-- Applies the trained PyTorch model to classify intents
-- Maintains conversational context for profile selection flows
+- Loads `data/data.pth` with `weights_only=True`
+- Uses a processing lock to prevent overlapping microphone sessions
+- Clears stale profile-selection context after timeout or unexpected errors
+- Uses `torch.inference_mode()` during classification
+- Keeps cloud wake-word listening opt-in
 
 ### `src/actions.py`
 
-- Configures Gemini when `GEMINI_KEY` is available
-- Detects the local Chrome executable
-- Maps intent tags to Chrome launch actions, Gemini prompts, or exit behavior
+- Uses the current `google-genai` SDK
+- Applies a Gemini request timeout through `HttpOptions`
+- Keeps general Gemini fallback opt-in through `LOCUS_ENABLE_GEMINI_FALLBACK=1`
+- Prefers standard Windows Chrome install paths before falling back to `PATH`
+- Routes MCP requests when MCP is explicitly enabled in settings
 
 ### `src/brain/trainer_module.py`
 
-- Loads `src/brain/intents.json`
-- Builds the vocabulary and training pairs
-- Trains a three-layer feedforward network
-- Saves weights and metadata to `data/data.pth`
-
-## Model Details
-
-### Training Inputs
-
-- Source data: `src/brain/intents.json`
-- Text preprocessing: tokenization, stemming, bag-of-words encoding
-- Labels: one class per intent tag
-
-### Network Shape
-
-- Input: vocabulary-sized bag-of-words vector
-- Hidden layer: 16 units
-- Hidden layer: 16 units
-- Output: number of intent tags
-
-### Training Settings
-
-- Framework: PyTorch
-- Loss: `CrossEntropyLoss`
-- Optimizer: Adam
-- Learning rate: `0.001`
-- Epochs: `1200`
+- Retrains only when `data/data.pth` is missing or older than `src/brain/intents.json`
+- Uses deterministic seeds
+- Stops early when the target loss or plateau condition is reached
+- Saves generated model data atomically
 
 ## Important Paths
 
 | Path | Purpose |
 |---|---|
-| `assets/` | Cat-state images used by the UI |
-| `scripts/debug_gemini.py` | Quick Gemini connectivity check |
-| `src/config.py` | Runtime defaults and file paths |
+| `frontend/src/` | React source |
+| `frontend/package-lock.json` | Frontend dependency lockfile |
+| `requirements.txt` | Python dependency manifest |
+| `scripts/debug_gemini.py` | Gemini connectivity check |
 | `src/brain/intents.json` | Intent dataset |
-| `data/data.pth` | Generated trained model |
-| `logs/` | Project-local logs |
+| `data/data.pth` | Generated trained model, ignored by git |
+| `data/settings.json` | Generated local settings, ignored by git |
+| `logs/` | Local logs, ignored by git |
 
 ## Current Constraints
 
 - Chrome launch behavior is Windows-specific.
-- Runtime settings changes are not persisted to disk.
 - Speech recognition depends on microphone availability and network-backed recognition.
-- The model is retrained on every startup rather than incrementally updated.
+- Cloud wake-word listening is disabled by default because it sends ambient snippets to Google Speech Recognition.
+- General Gemini fallback is disabled by default because it can send unsupported dictated text to Gemini.

@@ -1,28 +1,23 @@
-import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from google import genai
 
 load_dotenv()
-api_key = os.getenv('GEMINI_KEY')
+api_key = os.getenv("GEMINI_KEY") or os.getenv("GEMINI_API_KEY")
 
 print("--- DIAGNOSTICS ---")
-try:
-    print(f"Library version: {genai.__version__}")
-except:
-    print("Library version: <too old to show version>")
 
 if not api_key:
     print("ERROR: No key in .env!")
 else:
-    genai.configure(api_key=api_key)
     print(f"Key found: {api_key[:5]}...{api_key[-5:]}")
     print("\nAvailable models (what your script sees):")
     try:
+        client = genai.Client(api_key=api_key)
         found = False
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                print(f" - {m.name}")
-                found = True
+        for model in client.models.list():
+            print(f" - {model.name}")
+            found = True
         if not found:
             print("List is empty (key or region issue).")
     except Exception as e:

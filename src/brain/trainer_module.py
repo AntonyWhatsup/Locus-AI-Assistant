@@ -30,7 +30,10 @@ def _set_training_seed():
 def needs_retraining():
     if not os.path.exists(MODEL_DATA_PATH):
         return True
-    return os.path.getmtime(INTENTS_PATH) > os.path.getmtime(MODEL_DATA_PATH)
+    try:
+        return os.path.getmtime(INTENTS_PATH) > os.path.getmtime(MODEL_DATA_PATH)
+    except OSError:
+        return True
 
 
 def _load_intents():
@@ -136,6 +139,8 @@ def run_training(force=False):
     }
 
     os.makedirs(os.path.dirname(MODEL_DATA_PATH), exist_ok=True)
-    torch.save(data, MODEL_DATA_PATH)
+    temp_path = f"{MODEL_DATA_PATH}.tmp"
+    torch.save(data, temp_path)
+    os.replace(temp_path, MODEL_DATA_PATH)
     print(f"--- TRAINING COMPLETE | Final Loss: {best_loss:.6f} ---")
     return True

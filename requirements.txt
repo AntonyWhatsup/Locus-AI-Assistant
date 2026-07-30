@@ -1,0 +1,12 @@
+torch==2.9.1
+nltk==3.9.2
+numpy==2.3.3
+SpeechRecognition==3.14.5
+PyAudio==0.2.14
+Pillow==11.3.0
+python-dotenv==1.2.2
+google-genai==2.11.0
+fastapi==0.139.0
+uvicorn==0.51.0
+pywebview==6.2.1
+audioop-lts==0.2.2; python_version >= "3.13"

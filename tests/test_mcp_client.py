@@ -1,5 +1,7 @@
 import sys
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
@@ -49,7 +51,8 @@ class MCPClientTests(unittest.TestCase):
         with patch.object(actions.config, "MCP_ENABLED", True), patch.object(
             actions.config, "MCP_SERVER_COMMAND", SERVER_COMMAND
         ), patch.object(actions.config, "MCP_DEFAULT_TOOL", "answer_project_question"):
-            result = actions.execute_command_logic("greeting", 0.55, None)
+            with redirect_stdout(StringIO()):
+                result = actions.execute_command_logic("greeting", 0.55, None)
 
         self.assertEqual(result, ("mcp_request", None))
 

@@ -1,4 +1,10 @@
-import audioop
+try:
+    import audioop
+except ImportError:
+    try:
+        import pyaudioop as audioop
+    except ImportError:
+        import audioop_lts as audioop
 import threading
 import time
 from contextlib import suppress
@@ -109,7 +115,7 @@ def stop_activation(ui):
 def _normalize_level(frame_data, sample_width):
     try:
         rms = audioop.rms(frame_data, sample_width)
-    except audioop.error:
+    except Exception:
         return 0.0
     return min(1.0, rms / 2500.0)
 

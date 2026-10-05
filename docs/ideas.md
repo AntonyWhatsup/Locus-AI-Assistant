@@ -38,4 +38,4 @@ This file collects possible future improvements for Locus. It is intentionally s
 - Reduce startup and processing overhead
 - Add a plugin-style extension model
 - Expand unit and integration test coverage
-- Evaluate whether Tkinter should remain the UI framework long term
+- Keep React/PyWebView UI integration small enough that backend runtime state remains easy to test

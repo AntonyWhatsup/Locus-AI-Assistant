@@ -1,9 +1,15 @@
-import { useEffect, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import { Panel } from './AssistantPanel'
 import type { Theme } from '../themes'
 import type { AppStatus } from '../App'
 
 const statusInfo: Record<AppStatus, { label: string; sub: string; voiceLabel: string; voiceSub: string }> = {
+  initializing: {
+    label: 'Initializing',
+    sub: 'Backend is preparing the local model.',
+    voiceLabel: 'Voice Activity',
+    voiceSub: 'Not ready yet',
+  },
   idle: {
     label: "Say 'Locus'",
     sub: 'Left-click the cat or wait for the wake word.',
@@ -16,7 +22,7 @@ const statusInfo: Record<AppStatus, { label: string; sub: string; voiceLabel: st
     voiceLabel: 'Voice Activity',
     voiceSub: 'Live microphone input',
   },
-  thinking: {
+  processing: {
     label: 'Processing...',
     sub: 'Analyzing your command.',
     voiceLabel: 'Voice Activity',
@@ -28,32 +34,54 @@ const statusInfo: Record<AppStatus, { label: string; sub: string; voiceLabel: st
     voiceLabel: 'Voice Activity',
     voiceSub: 'Audio output active',
   },
+  error: {
+    label: 'Needs Attention',
+    sub: 'Check the latest status before listening again.',
+    voiceLabel: 'Voice Activity',
+    voiceSub: 'Unavailable',
+  },
 }
 
 const BAR_COUNT = 28
 const bars = Array.from({ length: BAR_COUNT }, (_, i) => i)
 
-export default function VoicePanel({ theme, status }: { theme: Theme; status: AppStatus }) {
+export default function VoicePanel({
+  theme,
+  status,
+  micLevel,
+  micStateText,
+  visualizerActive,
+  visualizerText,
+}: {
+  theme: Theme
+  status: AppStatus
+  micLevel: number
+  micStateText: string
+  visualizerActive: boolean
+  visualizerText: string
+}) {
   const info = statusInfo[status]
-  const isActive = status !== 'idle'
+  const isActive = visualizerActive || status === 'listening'
+  const activeLevel = Math.max(0, Math.min(1, micLevel))
 
   return (
     <Panel
       theme={theme}
       title={info.label}
-      action={status === 'idle' ? 'Idle' : status === 'listening' ? 'Listening' : status === 'thinking' ? 'Thinking' : 'Speaking'}
+      action={status === 'idle' ? 'Idle' : status === 'listening' ? 'Listening' : status === 'processing' ? 'Processing' : status === 'error' ? 'Error' : 'Starting'}
       actionColor={theme.accentText}
     >
-      <p style={{ fontSize: 11, color: theme.subtext, marginBottom: 12, marginTop: -4 }}>{info.sub}</p>
+      <p style={{ fontSize: 11, color: theme.subtext, marginBottom: 12, marginTop: -4 }}>
+        {visualizerText || micStateText || info.sub}
+      </p>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: theme.text }}>{info.voiceLabel}</span>
         <span style={{ fontSize: 11, color: isActive ? theme.accentText : theme.subtext, fontWeight: 500 }}>
-          {isActive ? 'Live' : 'Passive'}
+          {isActive ? `${Math.round(activeLevel * 100)}%` : info.voiceSub}
         </span>
       </div>
 
-      {/* Waveform bars */}
       <div
         style={{
           display: 'flex',
@@ -64,9 +92,8 @@ export default function VoicePanel({ theme, status }: { theme: Theme; status: Ap
         }}
       >
         {bars.map(i => {
-          const maxH = isActive
-            ? Math.floor(Math.random() * 0 + 12 + Math.sin(i * 0.5) * 12 + 8)
-            : 6 + Math.abs(Math.sin(i * 0.4)) * 8
+          const wave = 0.4 + Math.abs(Math.sin(i * 0.55)) * 0.6
+          const maxH = 4 + (activeLevel * 48 * wave)
           return (
             <div
               key={i}
@@ -82,15 +109,14 @@ export default function VoicePanel({ theme, status }: { theme: Theme; status: Ap
                 '--bar-dur': `${0.4 + (i % 5) * 0.12}s`,
                 '--bar-delay': `${(i % 7) * 0.06}s`,
                 animationPlayState: isActive ? 'running' : 'paused',
-                height: isActive ? undefined : `${4 + Math.abs(Math.sin(i * 0.4)) * 8}px`,
+                height: isActive ? undefined : `${4 + activeLevel * 16 * wave}px`,
                 transition: 'background 0.3s ease',
-              } as React.CSSProperties}
+              } as CSSProperties}
             />
           )
         })}
       </div>
 
-      {/* Bottom mini bars (historical) */}
       <div
         style={{
           display: 'flex',
@@ -107,7 +133,7 @@ export default function VoicePanel({ theme, status }: { theme: Theme; status: Ap
             key={i}
             style={{
               flex: 1,
-              height: `${6 + Math.abs(Math.sin(i * 0.7 + 1)) * 16}px`,
+              height: `${4 + activeLevel * (8 + Math.abs(Math.sin(i * 0.7 + 1)) * 18)}px`,
               background: `${theme.subtext}33`,
               borderRadius: 2,
             }}

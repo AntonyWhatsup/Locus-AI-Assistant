@@ -1,13 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { Panel } from './AssistantPanel'
+import type { ChatMessage } from '../App'
 import type { Theme } from '../themes'
 
-interface Message {
-  from: 'user' | 'locus'
-  text: string
-}
-
-export default function ConversationPanel({ theme, messages }: { theme: Theme; messages: Message[] }) {
+export default function ConversationPanel({ theme, messages }: { theme: Theme; messages: ChatMessage[] }) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -35,8 +31,9 @@ export default function ConversationPanel({ theme, messages }: { theme: Theme; m
   )
 }
 
-function MessageBubble({ msg, theme }: { msg: { from: string; text: string }; theme: Theme }) {
+function MessageBubble({ msg, theme }: { msg: ChatMessage; theme: Theme }) {
   const isUser = msg.from === 'user'
+  const label = msg.from === 'system' ? 'System' : isUser ? 'You' : 'Locus'
   return (
     <div
       style={{
@@ -53,10 +50,10 @@ function MessageBubble({ msg, theme }: { msg: { from: string; text: string }; th
           color: isUser ? theme.subtext : theme.accentText,
           marginBottom: 4,
           textTransform: 'uppercase',
-          letterSpacing: '0.08em',
+          letterSpacing: 0,
         }}
       >
-        {isUser ? 'You' : 'Locus'}
+        {label}
       </div>
       <p style={{ fontSize: 13, color: theme.text, lineHeight: 1.5 }}>{msg.text}</p>
     </div>

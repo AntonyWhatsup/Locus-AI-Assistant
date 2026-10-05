@@ -13,11 +13,18 @@ MODEL_NAME = "gemini-2.5-flash"
 GEMINI_TIMEOUT_MS = 15000
 CLOUD_WAKE_LISTENER_ENABLED = os.getenv("LOCUS_ENABLE_CLOUD_WAKE_LISTENER") == "1"
 GEMINI_FALLBACK_ENABLED = os.getenv("LOCUS_ENABLE_GEMINI_FALLBACK") == "1"
+DEBUG_MODE = False
+LOCAL_INTENT_CACHE_ENABLED = True
+MICROPHONE_SENSITIVITY = 65
+AUTO_LISTEN_ON_STARTUP = CLOUD_WAKE_LISTENER_ENABLED
+SHOW_LIVE_TRANSCRIPT = True
+AI_MODEL = "gemini" if GEMINI_FALLBACK_ENABLED else "local"
+TTS_VOICE = ""
 
 # Runtime-configurable settings
 WAKE_WORDS = ["locus", "local", "locust", "focus"]
 LANG_CODE = "en-US"
-THEME = "glass_green"
+THEME = "glass-green"
 ANIMATION_SPEED = "normal"
 MICROPHONE_DEVICE_ID = ""
 OUTPUT_AUDIO_DEVICE_ID = ""
@@ -39,6 +46,13 @@ DEFAULT_SETTINGS = {
     "gemini_model": MODEL_NAME,
     "theme": THEME,
     "animation_speed": ANIMATION_SPEED,
+    "microphone_sensitivity": MICROPHONE_SENSITIVITY,
+    "auto_listen_on_startup": AUTO_LISTEN_ON_STARTUP,
+    "show_live_transcript": SHOW_LIVE_TRANSCRIPT,
+    "ai_model": AI_MODEL,
+    "tts_voice": TTS_VOICE,
+    "debug_mode": DEBUG_MODE,
+    "local_intent_cache": LOCAL_INTENT_CACHE_ENABLED,
     "microphone_device_id": MICROPHONE_DEVICE_ID,
     "output_audio_device_id": OUTPUT_AUDIO_DEVICE_ID,
     "mcp_server_command": MCP_SERVER_COMMAND,

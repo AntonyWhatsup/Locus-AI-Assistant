@@ -33,7 +33,7 @@ export const themes: Record<ThemeName, Theme> = {
     accentDim: 'rgba(0,232,122,0.18)',
     accentText: '#00e87a',
     text: '#d8f5e5',
-    subtext: '#5a8a6a',
+    subtext: '#9bc5a9',
     inputBg: 'rgba(0,255,80,0.06)',
     listenBtn: '#00e87a',
     listenBtnText: '#021208',

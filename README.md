@@ -71,6 +71,17 @@ Locus_AI_Assistant/
    LOCUS_ENABLE_GEMINI_FALLBACK=1
    ```
 
+   Optional local frontend/WebSocket configuration:
+
+   ```env
+   LOCUS_PORT=8000
+   LOCUS_ALLOWED_WS_ORIGINS=http://127.0.0.1:8443,http://localhost:8443
+   VITE_LOCUS_API_BASE_URL=http://127.0.0.1:8000
+   VITE_LOCUS_WS_URL=ws://127.0.0.1:8000/ws
+   ```
+
+   `/ws` requires an allowed Origin and a per-run session token obtained from `/api/session`. Do not commit local tokens or credentials.
+
 6. Run the app:
 
    ```powershell

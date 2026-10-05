@@ -25,10 +25,11 @@ python main.py
 Startup flow:
 
 1. FastAPI starts on `127.0.0.1:8000`.
-2. PyWebView opens the local React UI.
-3. The local intent model retrains only if `data/data.pth` is missing or stale.
-4. The model is loaded.
-5. Optional background wake-word listening starts only when `LOCUS_ENABLE_CLOUD_WAKE_LISTENER=1`.
+2. The desktop launcher waits for `/health` to respond.
+3. PyWebView opens the local React UI.
+4. The local intent model retrains only if `data/data.pth` is missing or stale.
+5. The model is loaded.
+6. Optional background wake-word listening starts only when `LOCUS_ENABLE_CLOUD_WAKE_LISTENER=1`.
 
 ## How To Activate Locus
 
@@ -36,6 +37,41 @@ Startup flow:
 - Optionally say `Locus`, `local`, `locust`, or `focus` after enabling `LOCUS_ENABLE_CLOUD_WAKE_LISTENER=1`.
 
 By default, manual activation is the privacy-preserving path. Cloud wake-word listening uses Google Speech Recognition before the wake word is known. General Gemini fallback for unsupported dictated text is also opt-in via `LOCUS_ENABLE_GEMINI_FALLBACK=1`.
+
+## Settings
+
+Open Settings from the Assistant card or the `SET` item in the sidebar. The panel opens from the right and keeps unsaved edits in a draft until `Save changes`.
+
+Available settings:
+
+- Voice & Wake: wake words, microphone sensitivity, language, auto-listen on startup, live transcript display.
+- AI Model: local model or Gemini fallback when a Gemini API key is configured. OpenAI is shown as unavailable because this backend does not implement it.
+- Appearance: Glass Green, Dark, Light, Colorful, and Nyan themes. Theme names are saved with canonical values such as `glass-green` and `cat`.
+- Advanced: debug mode, local intent cache, and confirmed conversation-history clearing.
+
+TTS voice selection is displayed as unavailable because this backend does not currently implement TTS voice management.
+
+## Frontend Development And WebSocket Configuration
+
+The production frontend is served by FastAPI. For local frontend development, run Vite in `frontend/` and point it at the backend when needed:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Useful environment variables:
+
+| Variable | Purpose |
+|---|---|
+| `LOCUS_PORT` | Backend port, default `8000` |
+| `LOCUS_ALLOWED_WS_ORIGINS` | Comma-separated extra allowed browser origins for `/ws` and `/api/session` |
+| `LOCUS_WS_TOKEN` | Optional fixed WebSocket token for controlled local testing only |
+| `VITE_LOCUS_API_BASE_URL` | Frontend API base URL override |
+| `VITE_LOCUS_WS_URL` | Frontend WebSocket URL override |
+
+The backend generates a local session token on startup. The frontend gets it from `/api/session` and then connects to `/ws?token=...`. Do not store that token in source control.
 
 ## Supported Commands
 
@@ -58,6 +94,7 @@ By default, manual activation is the privacy-preserving path. Cloud wake-word li
 - If Chrome does not open, check the profile mapping in `src/config.py`.
 - If the UI is blank, run `npm install` and `npm run build` in `frontend/`.
 - If the app does not recognize expected commands, review `src/brain/intents.json`.
+- If Vite cannot connect to the backend WebSocket, add the Vite origin to `LOCUS_ALLOWED_WS_ORIGINS`.
 
 ## Local Verification
 

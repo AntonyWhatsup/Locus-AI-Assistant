@@ -21,6 +21,13 @@ class SettingsManagerTests(unittest.TestCase):
             "MODEL_NAME": config.MODEL_NAME,
             "THEME": config.THEME,
             "ANIMATION_SPEED": config.ANIMATION_SPEED,
+            "MICROPHONE_SENSITIVITY": config.MICROPHONE_SENSITIVITY,
+            "AUTO_LISTEN_ON_STARTUP": config.AUTO_LISTEN_ON_STARTUP,
+            "SHOW_LIVE_TRANSCRIPT": config.SHOW_LIVE_TRANSCRIPT,
+            "AI_MODEL": config.AI_MODEL,
+            "TTS_VOICE": config.TTS_VOICE,
+            "DEBUG_MODE": config.DEBUG_MODE,
+            "LOCAL_INTENT_CACHE_ENABLED": config.LOCAL_INTENT_CACHE_ENABLED,
             "MICROPHONE_DEVICE_ID": config.MICROPHONE_DEVICE_ID,
             "OUTPUT_AUDIO_DEVICE_ID": config.OUTPUT_AUDIO_DEVICE_ID,
             "GOOGLE_API_KEY": config.GOOGLE_API_KEY,
@@ -43,6 +50,13 @@ class SettingsManagerTests(unittest.TestCase):
         config.MODEL_NAME = self.original_runtime["MODEL_NAME"]
         config.THEME = self.original_runtime["THEME"]
         config.ANIMATION_SPEED = self.original_runtime["ANIMATION_SPEED"]
+        config.MICROPHONE_SENSITIVITY = self.original_runtime["MICROPHONE_SENSITIVITY"]
+        config.AUTO_LISTEN_ON_STARTUP = self.original_runtime["AUTO_LISTEN_ON_STARTUP"]
+        config.SHOW_LIVE_TRANSCRIPT = self.original_runtime["SHOW_LIVE_TRANSCRIPT"]
+        config.AI_MODEL = self.original_runtime["AI_MODEL"]
+        config.TTS_VOICE = self.original_runtime["TTS_VOICE"]
+        config.DEBUG_MODE = self.original_runtime["DEBUG_MODE"]
+        config.LOCAL_INTENT_CACHE_ENABLED = self.original_runtime["LOCAL_INTENT_CACHE_ENABLED"]
         config.MICROPHONE_DEVICE_ID = self.original_runtime["MICROPHONE_DEVICE_ID"]
         config.OUTPUT_AUDIO_DEVICE_ID = self.original_runtime["OUTPUT_AUDIO_DEVICE_ID"]
         config.GOOGLE_API_KEY = self.original_runtime["GOOGLE_API_KEY"]
@@ -81,6 +95,13 @@ class SettingsManagerTests(unittest.TestCase):
                 "gemini_model": "gemini-test-model",
                 "theme": "dark",
                 "animation_speed": "fast",
+                "microphone_sensitivity": 65,
+                "auto_listen_on_startup": False,
+                "show_live_transcript": True,
+                "ai_model": "local",
+                "tts_voice": "",
+                "debug_mode": False,
+                "local_intent_cache": True,
                 "microphone_device_id": "USB Mic",
                 "output_audio_device_id": "USB Speakers",
                 "mcp_server_command": "python scripts/mcp_project_server.py",
@@ -98,6 +119,13 @@ class SettingsManagerTests(unittest.TestCase):
                 "gemini_model": "gemini-test-model",
                 "theme": "dark",
                 "animation_speed": "fast",
+                "microphone_sensitivity": 65,
+                "auto_listen_on_startup": False,
+                "show_live_transcript": True,
+                "ai_model": "local",
+                "tts_voice": "",
+                "debug_mode": False,
+                "local_intent_cache": True,
                 "microphone_device_id": "USB Mic",
                 "output_audio_device_id": "USB Speakers",
                 "mcp_server_command": "python scripts/mcp_project_server.py",
@@ -198,6 +226,13 @@ class SettingsManagerTests(unittest.TestCase):
                 "gemini_model": "gemini-form-test",
                 "theme": "dark",
                 "animation_speed": "fast",
+                "microphone_sensitivity": 65,
+                "auto_listen_on_startup": False,
+                "show_live_transcript": True,
+                "ai_model": "local",
+                "tts_voice": "",
+                "debug_mode": False,
+                "local_intent_cache": True,
                 "microphone_device_id": "USB Mic",
                 "output_audio_device_id": "USB Speakers",
                 "mcp_server_command": "python scripts/mcp_project_server.py",
@@ -229,8 +264,15 @@ class SettingsManagerTests(unittest.TestCase):
                 "language_code": "en-GB",
                 "wake_words": ["locus", "focus"],
                 "gemini_model": "gemini-live",
-                "theme": "glass_green",
+                "theme": "glass-green",
                 "animation_speed": "slow",
+                "microphone_sensitivity": 65,
+                "auto_listen_on_startup": False,
+                "show_live_transcript": True,
+                "ai_model": "local",
+                "tts_voice": "",
+                "debug_mode": False,
+                "local_intent_cache": True,
                 "microphone_device_id": "Missing Mic",
                 "output_audio_device_id": "Missing Speaker",
                 "mcp_server_command": "python scripts/mcp_project_server.py",
@@ -271,6 +313,13 @@ class SettingsManagerTests(unittest.TestCase):
             "gemini_model": "gemini-save-test",
             "theme": "light",
             "animation_speed": "normal",
+            "microphone_sensitivity": 65,
+            "auto_listen_on_startup": False,
+            "show_live_transcript": True,
+            "ai_model": "local",
+            "tts_voice": "",
+            "debug_mode": False,
+            "local_intent_cache": True,
             "microphone_device_id": "USB Mic",
             "output_audio_device_id": "USB Speakers",
             "mcp_server_command": "python scripts/mcp_project_server.py",
@@ -298,6 +347,13 @@ class SettingsManagerTests(unittest.TestCase):
                     "gemini_model": "gemini-runtime-test",
                     "theme": "colorful",
                     "animation_speed": "slow",
+                    "microphone_sensitivity": 42,
+                    "auto_listen_on_startup": True,
+                    "show_live_transcript": False,
+                    "ai_model": "gemini",
+                    "tts_voice": "",
+                    "debug_mode": True,
+                    "local_intent_cache": False,
                     "microphone_device_id": "USB Mic",
                     "output_audio_device_id": "USB Speakers",
                     "mcp_server_command": "python scripts/mcp_project_server.py",
@@ -312,6 +368,13 @@ class SettingsManagerTests(unittest.TestCase):
         self.assertEqual(config.MODEL_NAME, "gemini-runtime-test")
         self.assertEqual(config.THEME, "colorful")
         self.assertEqual(config.ANIMATION_SPEED, "slow")
+        self.assertEqual(config.MICROPHONE_SENSITIVITY, 42)
+        self.assertTrue(config.AUTO_LISTEN_ON_STARTUP)
+        self.assertFalse(config.SHOW_LIVE_TRANSCRIPT)
+        self.assertEqual(config.AI_MODEL, "gemini")
+        self.assertTrue(config.GEMINI_FALLBACK_ENABLED)
+        self.assertTrue(config.DEBUG_MODE)
+        self.assertFalse(config.LOCAL_INTENT_CACHE_ENABLED)
         self.assertEqual(config.MICROPHONE_DEVICE_ID, "USB Mic")
         self.assertEqual(config.OUTPUT_AUDIO_DEVICE_ID, "USB Speakers")
         self.assertEqual(config.MCP_SERVER_COMMAND, "python scripts/mcp_project_server.py")

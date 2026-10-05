@@ -32,7 +32,7 @@
 | Етап | Компонент | Статус | Примітки |
 | :--- | :--- | :---: | :--- |
 | **0** | **Стабілізація бази** | ✅ Виконано | Тести (44/44) пройдено, створено тег `v2.3.1.safe` |
-| **1** | **MCP Gateway & Mediation Layer** | ⏳ Очікує | Рефакторинг `src/mcp_client.py` у мультисерверний Gateway |
+| **1** | **MCP Gateway & Mediation Layer** | ✅ Виконано | Пакет `src/mcp/`, `MCPGateway`, `ServerRegistry`, тести (51/51) пройдено |
 | **2** | **ATBA & SERF** | ⏳ Очікує | Адаптивні тайм-аути та структуровані помилки |
 | **3** | **Intent Router (Tool Attention)** | ⏳ Очікує | Динамічна фільтрація інструментів для уникнення MCP Tax |
 | **4** | **Trust Governance & HITL (UI)** | ⏳ Очікує | Інтеграція підтверджень через WebSocket/FastAPI в React UI |
@@ -50,13 +50,18 @@
 
 ---
 
-### Етап 1: MCP Gateway & Реєстр серверів
-- [ ] Створити модуль `src/mcp_gateway.py` (або розширити `src/mcp/`):
-  - [ ] Підтримка пулу підключень до кількох MCP-серверів одночасно (stdio / sse).
-  - [ ] Конфігурація серверів через `data/mcp_servers.json` або `settings_manager.py`.
-  - [ ] Реєстрація інструментів із префіксами/неймспейсами (наприклад `fs__read_file`, `web__fetch`).
-  - [ ] Автоматичний рестарт збійних серверів (health check & heartbeat).
-- [ ] Unit-тести для `MCPGateway` у `tests/test_mcp_gateway.py`.
+### Етап 1: MCP Gateway & Реєстр серверів (Завершено)
+- [x] Створено модульний пакет `src/mcp/`:
+  - [x] `src/mcp/models.py`: dataclass'и `MCPTool`, `ServerConfig`, `ToolExecutionResult`, енами `RiskLevel`, `ServerStatus`, `ServerTransport`.
+  - [x] `src/mcp/exceptions.py`: структурована ієрархія помилок `MCPConnectionError`, `MCPTimeoutError`, `MCPToolNotFoundError`, `MCPExecutionError`.
+  - [x] `src/mcp/client.py`: потокобезпечний stdio-клієнт з RLock та ізольованим життєвим циклом.
+  - [x] `src/mcp/registry.py`: `ServerRegistry` з підтримкою завантаження з файлів (`data/mcp_servers.json`) та словників.
+  - [x] `src/mcp/gateway.py`: `MCPGateway` (Mediation Layer) з агрегацією каталогів інструментів, просторами імен (`server__tool` / `server:tool`) та ізоляцією помилок виконання.
+  - [x] `src/mcp/__init__.py`: глобальний синглтон `get_gateway()`, автоматичне підключення серверів.
+  - [x] `src/mcp_client.py`: 100% зворотна сумісність для існуючого коду.
+- [x] Конфігурація серверів у [data/mcp_servers.json](file:///d:/GitFile/Locus_AI_Assistant/data/mcp_servers.json).
+- [x] Unit-тести для `MCPGateway` у [tests/test_mcp_gateway.py](file:///d:/GitFile/Locus_AI_Assistant/tests/test_mcp_gateway.py).
+- [x] Усі 51 тест успішно пройдено.
 
 ---
 

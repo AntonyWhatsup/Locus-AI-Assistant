@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "project_server": {
+      "command": "python",
+      "args": ["scripts/mcp_project_server.py"],
+      "enabled": true,
+      "transport": "stdio",
+      "timeout_seconds": 8.0,
+      "auto_restart": true
+    }
+  }
+}
